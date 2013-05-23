@@ -1,0 +1,183 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{Data Audit System Design}\\\smallskip}%
+  {\LARGE \textsf{JSON API PART}}
+}
+
+\author{Qu Qinglei 编写 \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+
+%[A]
+\section{插件管理}
+\subsection{安装插件的命令}
+\begin{minted}{js}
+{
+    "type": "addPlugin",
+    "plugType": "parser",
+}
+\end{minted}
+
+\subsection{删除插件的命令}
+\begin{minted}{js}
+{
+    "type": "removePlugin",
+    "plugType": "parser",
+    "plugName": "messagesParser",
+    "dropDatabase": true
+}
+\end{minted}
+
+
+%[B]
+\section{日志管理}
+\subsection{添加监听日志的命令}
+\begin{minted}{js}
+{
+    "type": "addDatatype",
+    "dataType": "messages",
+    "port": 514,
+    "description": "about this kind of message, can be null."
+}
+\end{minted}
+
+\subsection{删除监听日志的命令}
+\begin{minted}{js}
+{
+    "type": "removeDatatype",
+    "dataType": "messages",
+}
+\end{minted}
+
+%[C]
+\section{报警管理}
+\subsection{添加报警条件的命令}
+\begin{minted}{js}
+{
+    "type": "addAlarm",
+    "alarmName": "Intrusion Detection",
+    "dataType": "messages",
+    "globalAlarm": false,
+    "alarms": {
+        "startTime": "2013-10-11:20:30:15",
+        "endTime": "2013-10-11:20:30:15",
+        "keywords": "attack#segment falt#stackoverflow#Job `cron.daily' terminated"
+    }
+}
+\end{minted}
+
+\subsection{删除报警条件的命令}
+\begin{minted}{js}
+{
+    "type": "removeAlarm",
+    "dataType": "messages",
+    "alarmName": "Intrusion Detection"
+}
+\end{minted}
+
+%[D]
+\section{过滤器管理}
+\subsection{添加过滤器}
+\begin{minted}{js}
+{
+    "type": "addFilter",
+    "filterName": "useless",
+    "dataType": "messages",
+    "globalFilter": false,
+    "filters": {
+        "startTime": "2013-10-11:20:30:15",
+        "endTime": "2013-10-11:20:30:15",
+        "keywords": "useless#(CRON)#DHCPREQUEST"
+    }
+}
+\end{minted}
+\subsection{删除过滤器}
+\begin{minted}{js}
+{
+    "type": "removeFilter",
+    "filterName": "useless",
+    "dataType": "messages"
+}
+\end{minted}
+
+%[E]
+\section{邮箱配置管理}
+\subsection{添加邮箱地址}
+\begin{minted}{js}
+{
+    "type": "addEmail",
+    "emailName": "quqinglei.aries@gmail.com",
+    "mailCategory": "admin"
+}
+\end{minted}
+
+\subsection{更改邮箱地址}
+\begin{minted}{js}
+{
+    "type": "editEmail",
+    "emailName": "quqinglei.aries@gmail.com",
+}
+\end{minted}
+
+\subsection{删除邮箱地址}
+\begin{minted}{js}
+{
+    "type": "removeEmail",
+    "emailName": "quqinglei.aries@gmail.com",
+}
+\end{minted}
+
+%[F]
+\section{数据管理}
+\subsection{删除所有本地报警数据}
+\begin{minted}{js}
+{
+    "type": "removeAllalarmData"
+}
+\end{minted}
+
+%[G]
+\section{默认配置管理}
+\subsection{设置数据保留的时间}
+\begin{minted}{js}
+{
+    "type": "setDataRetentionTime",
+    "last": 365
+}
+\end{minted}
+
+%[F]
+\section{尾注}
+本文档主要涉及\code{JSON API}的设计格式，力求最简，在后期可能会有些改动，应该不大。版本
+更改内容会在尾注上标注。
+
+Thu May 23 17:05:39 CST 2013 第一次编写
+
+
+
+\end{document}
+
+
+
