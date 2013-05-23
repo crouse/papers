@@ -1,0 +1,46 @@
+\documentclass{article}
+\let\tldocenglish=1
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+%\begin{minted}{python}
+%\end{minted}
+%\colorbox{blue}{text}
+%\textcolor{blue}{GEO}
+
+\begin{document}
+
+\title{
+  {\huge \textsf{读书笔记}\\\smallskip}
+  {\small \textit{一些问题的解答}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 5 月}}
+
+\maketitle
+\newpage
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+\newpage 
+
+\section{汇编语言，王爽著}
+\subsection{page: 128, keyword: mov sp,30h question: why 30h?}
+\emph{desc}我们将\textit{cs:10~cs:2F}的内存空间当作栈来使用，初始状态下栈为空，所以
+\textit{ss:sp}要指向栈底，则设置\textit{ss:sp}指向\textit{cs:30}。如果对这点还有疑惑
+建议回头认真复习一下第三章。
+
+\indent\emph{ans}代码中最前面有24个字，也就是48个字节，转换成十六进制就是0x30，则为
+空栈的栈顶地址。或者说，\textit{cs:10~cs:2F}栈顶为 \bf{$0x2F + 1 = 0x30$}
+
+\end{document}

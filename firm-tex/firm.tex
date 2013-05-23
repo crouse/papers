@@ -1,0 +1,42 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{加固你的操作系统}\\\smallskip}%
+  {\small \textit{主要介绍GNU/Linux下的系统加固，后期会提供一些自动化脚本}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 5 月}}
+
+\maketitle
+\newpage
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+\newpage 
+
+\section{排序}
+\subsection{Python 字典排序}
+\begin{minted}{python}
+>>> lst = {'a': 100, 'b': 50, 'c': 1000}
+>>> sorted(lst.items(), key = lambda x: x[1])
+[('b', 50), ('a', 100), ('c', 1000)]
+\end{minted}
+只是一个测试
+
+\end{document}

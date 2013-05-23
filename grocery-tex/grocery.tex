@@ -1,0 +1,391 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{杂项记录}\\\smallskip}%
+  {\small \textit{一些常识}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 5 月}}
+
+\maketitle
+\newpage
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+\newpage 
+
+\section{线程和栈}
+每个线程都有独立的栈空间，这是必然的要不就乱套了，这个问题想想也会明白，因为
+每个线程其实都是一个单独的调用单位，在Linux下他们都属于较为轻量级的进程，每个线程
+里的函数都是顺序执行的，顺序执行就需要栈的支持，如果线程之间共用同一个栈那就乱套了，
+这个问题可以想想汇编语言和c语言的关系，特别是调用函数时的压栈，以及在函数执行时的
+出栈过程，你就想到了。
+
+\section{main函数和int}
+在新的规范中，main函数必须是int类型的，这是规定，从下面的几个例子中我们能
+看出个所以然来：
+
+
+\begin{minted}{c}
+int main()
+{
+	return 0;
+	/* if return -1 you will get 255 after run ./a.out, use
+	echo $? to get the return value */
+}
+
+/* gcc a.c
+$ ./a.out
+$ echo $?
+0 
+*/
+\end{minted}
+
+\section{函数和汇编}
+
+\begin{minted}{c}
+CODE
+void funtction1() {
+	int A = 10;
+	A += 66;
+}
+
+compiles to...
+funtction1:
+1	pushl %ebp #
+2	movl %esp, %ebp #,
+3	subl $4, %esp #,
+4	movl $10, -4(%ebp) #, A
+5	leal -4(%ebp), %eax #, 
+6	addl $66, (%eax) #, A
+7	leave
+8	ret
+Explanation:
+1. push ebp
+2. copy stack pointer to ebp
+3. make space on stack for local data
+4. put value 10 in A (this would be the address A has now)
+5. load address of A into EAX (similar to a pointer)
+6. add 66 to A
+... don't think you need to know the rest
+\end{minted}
+
+\begin{itemize}
+\item[(1)] 把ebp的值压入到栈中
+\item[(2)] 把栈指针复制到ebp
+\item[(3)] [tbd]
+\end{itemize}
+
+\section{机器相关}
+
+\subsection{关于代码段、数据段、堆、栈段、BSS段}
+\begin{description}
+\item[代码段] 通常用来存放程序执行代码，大小在编译后就已经确定，此内存区域通常属于
+只读，某些架构也允许代码段可写，也就是说允许修改程序。在代码段中也有可能包含一些只读
+的常量变量，例如字符串常量。
+\item[数据段] 通常用来存放程序中已经初始化的全局变量的一块内存区域，数据段属于静态
+内存分配。
+\item[堆] 堆是用来存放进程运行中被动态分配的内存段，它的大小不确定，可以使用\textbf{
+malloc()/calloc()}函数去向操作系统索取，可以使用\textbf{free()}函数去释放。
+\item[栈] 是用户用来存放临时创建的局部变量，也就是说我们函数括号内定义的变量
+\footnote{\textbf{static}声明的变量除外，它意味着在数据段中存放变量}除此之外，在函数
+被调用时其参数也会被压入发起调用的进程栈中，并且待到调用结束后函数的返回值也会被存放
+回栈中。由于栈的先进先出的特点，所以它特别适合用来保存或者恢复调用现场。
+\item[BSS] 通常是指用来存放程序中未初始化的全局变量的一块内存区域，属于静态内存分配
+。
+\end{description}
+
+\subsection{一个栈最大可以为多少，为什么，栈的大小可以设置么}
+决定栈大小的根本是\textbf{SP}的大小，也就是堆栈寄存器的大小，在\textbf{8086}中
+\textbf{SP}的变化范围是\textbf{0-FFFFH}\footnote{因为8086机器的栈顶指针寄存器长度为
+16位}栈的大小在一些系统上是可以设置的，在Linux上可以通过\textbf{ulimit -a} 查看栈的
+默认大小，也可以通过如\textbf{ulimit -s 8192}的方法去设置栈的大小，当参数大于机器
+本身的栈指针寄存器的大小时，系统会提示设置为无限的。当然栈的大小不可能是无限的它最终
+还是受\textbf{SP}的影响。在32位机器上，它的范围为\textbf{0x00 - 0xFFFFFFFF}在64位机器
+上范围为\textbf{0x00 - 0xFFFFFFFFFFFFFFFF}
+\begin{minted}[bgcolor=bg,linenos=true]{bash}
+# ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 7899
+max locked memory       (kbytes, -l) 64
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 7899
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+# ulimit -s 32767 
+\end{minted}
+
+\subsection{关于栈的定义摘自维基百科}
+\url{http://en.wikipedia.org/wiki/Data\_segment}
+\textsf{
+The stack area contains the program stack, a LIFO structure, typically located in the 
+higher parts of memory. A "stack pointer" register tracks the top of the stack; it is 
+adjusted each time a value is "pushed" onto the stack. The set of values pushed for 
+one function call is termed a "stack frame". A stack frame consists at minimum of a 
+return address. Automatic variables are also allocated on the stack.
+The stack area traditionally adjoined the heap area and they grew towards each other; 
+when the stack pointer met the heap pointer, free memory was exhausted. With large 
+address spaces and virtual memory techniques they tend to be placed more freely, but 
+they still typically grow in opposite directions. On the standard PC x86 architecture 
+the stack grows toward address zero, meaning that more recent items, deeper in the call 
+chain, are at numerically lower addresses and closer to the heap. On some other 
+architectures it grows the opposite direction.}
+
+下面我们在\textbf{Linux C}代码里尝试使用栈大小限制，看代码
+
+\subsection{段错误，栈溢出}
+\begin{minted}[bgcolor=bg,linenos=true]{c}
+/* stackOverFlow.c */
+#include <stdio.h>
+
+double fact(double n) 
+{
+	if (n <= 0) return 1;
+	else return n * fact(n - 1);
+}
+
+int main() 
+{
+	printf("fact(5) = %g\n", fact(5));
+	printf("fact(10) = %g\n", fact(10));
+	printf("fact(100) = %g\n", fact(100));
+	printf("fact(1000) = %g\n", fact(1000));
+	printf("fact(1000000) = %g\n", fact(1000000));
+}
+\end{minted}
+
+下面是在Linux 32bit的测试结果：
+
+\begin{minted}{bash}
+# gcc stackOverFlow.c -o stackOverFlow
+fact(5) = 120
+fact(10) = 3.6288e+06
+fact(100) = 9.33262e+157
+fact(1000) = inf
+Segmentation fault (core dumped)
+
+\end{minted}
+
+\begin{minted}{c}
+/* stackOverFlowSimple.c */
+int main()
+{
+	main();
+}
+\end{minted}
+
+\subsection{$\spadesuit$为什么软中断使用寄存器状态}
+个人认为，软中断模仿硬件中断，而检查寄存器状态查找中断向量表的速度应该最为快速，关于
+到底时为什么我至今没有太为理解，\fbox{QUESTION}存在疑问。下面是
+一些参数的存放位置：
+\begin{itemize}
+\item 0st 参数EAX， 一般用来存放系统调用号码
+\item 1st EBX，第一个参数的存放位置
+\item 2nd ECX，第二个参数的存放位置
+\item 3rd EDX，第三个参数的存放位置
+\item 4th ESI，第四个参数的存放位置
+\item 5th EDI，第五个参数的存放位置
+\end{itemize}
+如果想查看具体内容，请参考\textit{Linux System Calls for HLA Programmers}
+
+\subsection{大端与小端测试}
+现在的因特尔系列的计算机基本都是小端，在小端存储格式中，低地址中存放的是
+字数据的低字节，高地址存放的是字数据的高字节。下面的代码可以测试机器是大端还是小端：
+\begin{minted}[bgcolor=bg,linenos=true]{c}
+#include <stdio.h>
+
+int bigendian() 
+{
+	int num = 0x12345678;
+	char *low = (char*) &num;
+	return (*low == 0x78) ? 0 : 1;
+}
+
+int main()
+{
+	if (bigendian()) 
+		printf("Big endian\n");
+	else 
+		printf("Small endian\n");
+
+	return 0;
+}
+\end{minted}
+\begin{description}
+\item[0x12345678] 转换为二进制数据则为29位的0b10010001101000101011001111000，占8个字节。
+\item[第五行代码] 取i的地址
+\item[第六行代码] 查看第一个字节存放的是否为低位数据，如果为0x78则验证了系统为小端编码，反之
+则验证为大端编码。
+\end{description}
+下面有一个例子，可以看得比较明白，如果是低端编码，我们可以看到在低位内存地址存放的是低位数据，
+而高位地址则存放的为高位数据。
+
+\begin{minted}[bgcolor=bg,linenos=true]{c}
+#include <stdio.h>
+
+int main()
+{
+	int i = 0;
+	int num = 0x12345678;
+	char *low = (char*) &num;
+	for (i = 0; i < 4; i++) {
+		printf("address %p, num 0x%x\n", low + i,  *(low + i));
+	}
+	
+	return 0;
+}
+\end{minted}
+下面是程序在因特尔平台的输出样本
+
+\begin{minted}[bgcolor=bg,linenos=true]{c}
+address 0xbfc30644, num 0x78
+address 0xbfc30645, num 0x56
+address 0xbfc30646, num 0x34
+address 0xbfc30647, num 0x12
+\end{minted}
+
+\section{安装相关}
+\subsection{在GNU/Linux下安装dos模拟器，以及汇编工具}
+下面是安装步骤：
+\begin{enumerate}
+\item[(1)]安装dosbox，通过执行命令\textit{apt-get install dosbox}，这个软件在
+windows上也有相应的版本。地址是：\url{www.dosbox.com}，可以直接从官网下载。
+\item[(2)]下载masm汇编工具，我把它备份到了我的dropbox上，帐号为：
+\email{quqinglei@icloud.com}，密码是那个我记忆中最熟悉的那个，最简单的
+那个，哈哈，不告诉你。在网上能搜到，如果搜不到可以发给我邮件。
+\item[(3)]安装完dosbox后，可以通过其内置的mount命令，把本地的文件夹mount到模拟的
+dos机器上。方法如下：
+\begin{enumerate}
+\item创建一个文件夹，如/home/lei/8086/
+\item在dosbox的文本界面里输入\textit{mount c /home/lei/8086}
+\item切换到\textit{C:}然后用\textit{dir}查看是否已经挂载成功 
+\end{enumerate}
+\end{enumerate}
+
+\section{调试示例}
+% label 就是其英文名称，标签，用来被以后要写的内容
+% 进行交叉引用。引用方式如第~\ref{sec:intro}~节 这就会引用了上面定义的标签。
+\subsection{断点与寄存器调试}
+\subsubsection{代码}
+\begin{minted}[bgcolor=bg,linenos=true]{as}
+;FileName: hello.asm
+;Compile: nasm -f elf hello.asm -g -F stabs
+;	gcc -o hello hello.o -g
+
+section .text
+global main
+main:
+	mov eax, 4 ;4号调用
+	mov ebx, 1 ;ebx送1表示stdout
+	mov ecx, msg ;字符串的首地址送如ecx
+	mov edx, 14 ;字符串的长度送入edx
+	int 80h ;系统调用
+	mov eax, 1 ;1号调用，表示退出
+	int 80h ;系统调用
+msg:
+	db "Hello World!", 0ah, 0dh
+\end{minted}
+
+\begin{minted}{sh}
+# nasm -f elf hello.asm -g -F stabs
+# gcc -o hello hello.o -g
+\end{minted}
+
+\subsubsection{调试工具的使用介绍}
+
+\begin{description}
+\item[gdb list]列出代码和行号
+\newline
+\begin{minted}{sh}
+# gdb hello
+(gdb) list
+1	;FileName: hello.asm
+2	;Compile: nasm -f elf hello.asm -g -F stabs
+3	;	gcc -o hello hello.o -g
+4	
+5	section .text
+6	global main
+7	main:
+8		mov eax, 4 ;4号调用
+9		mov ebx, 1 ;ebx送1表示stdout
+10		mov ecx, msg ;字符串的首地址送如ecx
+(gdb) 
+
+\end{minted}
+\item[gdb break]可以根据行号、函数、条件生成断点
+\newline
+\begin{minted}{sh}
+(gdb) break 8
+Breakpoint 1 at 0x80483e0: file hello.asm, line 8.
+(gdb) breka 9
+Undefined command: "breka".  Try "help".
+(gdb) break 10
+Breakpoint 2 at 0x80483ea: file hello.asm, line 10.
+(gdb) break 11
+Breakpoint 3 at 0x80483ef: file hello.asm, line 11.
+(gdb) run
+Starting program: /home/lei/asm/hello 
+Breakpoint 1, 0x080483e0 in main ()
+(gdb) p $eax
+$1 = 1
+(gdb) n
+Single stepping until exit from function main,
+which has no line number information.
+
+Breakpoint 2, 0x080483ea in main ()
+(gdb) p $eax
+$2 = 4
+(gdb) 
+\end{minted}
+\item[info registers]用来查看所有寄存器里存储的数据
+\newline
+
+\begin{minted}{sh}
+(gdb) info registers
+eax            0x4	4
+ecx            0xbffff344	-1073745084
+edx            0xbffff2d4	-1073745196
+ebx            0x1	1
+esp            0xbffff2ac	0xbffff2ac
+ebp            0x0	0x0
+esi            0x0	0
+edi            0x0	0
+eip            0x80483ea	0x80483ea <main+10>
+eflags         0x246	[ PF ZF IF ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
+(gdb) 
+\end{minted}
+\end{description}
+
+\end{document}

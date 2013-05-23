@@ -1,0 +1,101 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{想法与实现}\\\smallskip}%
+  {\small \textsf{设计你的想法}}
+}
+
+\author{Qu Qinglei 编写 \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+\label{sec:firstPage}
+%\listoftables
+\end{multicols}
+
+\section{Raspberry Pi}
+\subsection{智能监控装置}
+常规的监控装置会把所有的影像都录制下来，虽然很稳妥，但是也耗费大量的空间去存储，同时也
+不利于后期的查找，而且没有主动防御的功能。所以我想设计一个新的带有主动防御功能的监控装置
+功能如下所述：
+\begin{itemize}
+\item 采用Raspberry Pi 去开发
+\item 使用温度、声音、摄像头、湿度、光、气味传感器赋予计算机超越人类的感知
+\item 可以根据外设传感器判断当前的状态
+\item 可以判断声音的来源是否为白噪声、汽车、风吹落叶等杂音，并实时记录成文本信息
+\item 赋予计算机主动处理一些事件比如警报、警告等
+\end{itemize}
+
+\subsection{家庭智能机器人}
+设计一个可以擦地板、开窗帘、捡垃圾、管理电视、管理个人事务、记录谈话、沏茶、洗碗、刷马桶、
+自消毒、避开障碍物等功能的机器人。机器大脑在主计算机上，自我判断逻辑采用Rasberry Pi建造，
+可以在不依赖主计算机存在的情况下处理一些简单事务。
+
+\subsection{智能脑}
+我所有设计的设备都被智能脑所控制，智能脑不只是简单的控制，它还有对人的性格和爱好以及心理
+进行判断和总结，并在长期形成一个资料库，可以处理一些简单的命令式会话，而非真正意义上的聊天，
+其实也可以设计一些聊天思路。
+{(\it{返回第\pageref{sec:firstPage}页})}
+
+\section{Network}
+\subsection{几页书网站}
+做一个互相交流心得的网站，每个人都可以针对一个话题写一个详细的手册，此手册在描述问题，
+以及解决方案上要从根本上分析问题。所有手册都提供pdf下载以及在线浏览。另外同样采用评分
+机制对每本书进行评价，评价最高的排在此网站此项内容的最前面。
+{(\it{返回第\pageref{sec:firstPage}页})}
+
+
+
+%\section{简介}
+%\label{sec:intro}
+%
+%\subsection{\TeX\ Live 与 \TeX\ Collection}
+%
+%本文档描述 \TL{} 软件的主要功能和特性，\TL{} 是 \TeX{} 及其相关程序在
+%\acro{GNU}/Linux 及其他类 Unix 系统、\MacOSX\ 和 Windows
+%系统下的一套发行版。
+%
+%你可以直接下载 \TL{}，也可以在 \TeX{} 用户组织给会员分发的 \TK{}
+%\DVD 中找到。第~\ref{sec:intro}~节中，简要地介绍了
+%\DVD 的内容。这两套发行版都是用户组织共同协作完成的。
+%这篇文档, 主要介绍 \TL{} 本身。
+%
+%\TL{} 包括了 \TeX{}, \LaTeXe{}, \ConTeXt, \MF, \MP, \BibTeX{}
+%等许多可执行程序；种类繁多的宏包、字体和文档，并支持世界上许多
+%不同的语言。
+%
+%文档末尾的第~\ref{sec:intro}~节 (第~\pageref{sec:intro}~页)
+%介绍了这一版 \TL{} 的重要改变。
+%
+%\subsection{本文是一个例子程序}
+%下面是关于一个代码排版工具的使用。
+%
+%\begin{minted}{c}
+%#include <stdio.h>
+%int main()
+%{
+%	printf("Hello world!\n");
+%	return 0;
+%}
+%\end{minted}
+
+
+\end{document}

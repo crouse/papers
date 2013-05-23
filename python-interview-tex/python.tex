@@ -1,0 +1,213 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{minted}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{Python 问题集}\\\smallskip}%
+}
+
+\author{\textit{屈庆磊整理} \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+
+\section{单例模式}
+\textsf{定义} 简单的说就是一个类的对象在程序中只存在一份，比较难理解，必须从例子入手。
+
+\subsection{一个普通的类}
+\begin{listing}[H]
+\begin{minted}{python}
+# 定义一个类X， 然后接下来看
+>>> class X:
+...     pass
+... 
+>>> l = X() # l 是一个类的实例
+>>> l.one = 'one' # 我们给l的one成员赋值
+>>> l.one # 打印l.one的值
+'one'
+>>> m = X() # m 是一个新的实例
+>>> m.one 
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: X instance has no attribute 'one'
+>>> print l, m
+<__main__.X instance at 0xb742e1cc> <__main__.X instance at 0xb742e38c>
+# 打印x和y的地址，从上面看是不同的，因为他们属于不同的实例
+\end{minted}
+\label{normalClass}
+\caption{一个普通的类和它的实例}
+\end{listing}
+
+\subsection{单例模式示例一}
+\begin{listing}[H]
+\begin{minted}{python}
+>>> class X:
+...     pass
+... 
+>>> X = lambda singleton = X(): singleton
+>>> 
+>>> x = X()
+>>> x.one = 'one'
+>>> x.one
+'one'
+>>> y = X()
+>>> y.one
+'one'
+>>> print x, y
+<__main__.X instance at 0xb742e26c> <__main__.X instance at 0xb742e26c>
+# 打印x和y的地址，从上面看他们是相同的
+\end{minted}
+\label{singleton}
+\caption{一个使用lambda的单实例的类和它的实例}
+\end{listing}
+
+我们从上面的第\pageref{normalClass}页的代码框中可以看出类的所有实例都是那一个。而从第\pageref{singleton}页的
+代码框里可以看出，实例的内存地址是一样的，也就说明它们实际上是一个。
+
+\subsection{单例模式示例二}
+\begin{listing}[H]
+\begin{minted}{python}
+>>> def singleton(cls):
+...     instance = {}
+...     def get_instance():
+...             if cls not in instance:
+...                     instance[cls] = cls()
+...             return instance[cls]
+...     return get_instance
+... 
+>>> @singleton
+... class MyClass:
+...     pass
+... 
+>>> a = MyClass()
+>>> b = MyClass()
+>>> print a, b
+<__main__.MyClass instance at 0xb6ac1aac> <__main__.MyClass instance at 0xb6ac1aac>
+# 打印x和y的地址，从上面看他们是相同的
+\end{minted}
+\label{singleton2}
+\caption{单例模式示例二，采用PEP318的实现方式}
+\end{listing}
+
+\subsection{单例模式示例三}
+\begin{listing}[H]
+\begin{minted}{python}
+class Singleton:
+    """
+    A non-thread-safe helper class to ease implementing singletons.
+    This should be used as a decorator -- not a metaclass -- to the
+    class that should be a singleton.
+
+    The decorated class can define one `__init__` function that
+    takes only the `self` argument. Other than that, there are
+    no restrictions that apply to the decorated class.
+
+    To get the singleton instance, use the `Instance` method. Trying
+    to use `__call__` will result in a `TypeError` being raised.
+
+    Limitations: The decorated class cannot be inherited from.
+
+    """
+
+    def __init__(self, decorated):
+        self._decorated = decorated
+
+    def Instance(self):
+        """
+        Returns the singleton instance. Upon its first call, it creates a
+        new instance of the decorated class and calls its `__init__` method.
+        On all subsequent calls, the already created instance is returned.
+
+        """
+        try:
+            return self._instance
+        except AttributeError:
+            self._instance = self._decorated()
+            return self._instance
+
+    def __call__(self):
+        raise TypeError('Singletons must be accessed through `Instance()`.')
+
+    def __instancecheck__(self, inst):
+        return isinstance(inst, self._decorated)
+
+
+@Singleton
+   class Foo:
+       def __init__(self):
+           print 'Foo created'
+
+   f = Foo() # Error, this isn't how you get the instance of a singleton
+
+   f = Foo.Instance() # Good. Being explicit is in line with the Python Zen
+   g = Foo.Instance() # Returns already created instance
+
+   print f is g # True
+\end{minted}
+\label{singleton2}
+\caption{单例模式示例三}
+\end{listing}
+
+
+\section{类型介绍}
+\subsection{大体简单的介绍}
+\label{sec:type}
+\begin{table}[H]
+\begin{tabular}{|p{2cm}|p{5cm}|p{5cm}|}
+\hline
+\textit{类型} & \textit{描述} & \textit{语法示例}\\\hline
+str &  A character string: an immutable sequence of Unicode codepoints. & \code{'Wikipedia', "Wikipedia", """Spanning multiple lines"""}\\\hline
+
+bytearray & A mutable sequence of bytes. & \code{bytearray(b'Some ASCII') bytearray(b"Some ASCII") bytearray([119, 105, 107, 105])} \\\hline
+
+bytes & An immutable sequence of bytes. & code{b'Some ASCII' b"Some ASCII" bytes([119, 105, 107, 105])} \\\hline
+
+list & Mutable list, can contain mixed types. & [4.0, 'string', True] \\\hline
+
+tuple & Immutable, can contain mixed types. & (4.0, 'string', True)\\\hline
+set, frozenset & Unordered set, contains no duplicates. A frozenset is immutable. & {4.0, 'string', True} frozenset([4.0, 'string', True]) \\\hline
+
+set, frozenset & Unordered set, contains no duplicates. A frozenset is immutable. & {4.0, 'string', True} frozenset([4.0, 'string', True]) \\\hline
+
+dict &  mutable associative array of key and value pairs. & \code{\{'key1': 1.0, 3: False\}} \\\hline
+
+int & An immutable integer of unlimited magnitude.[43] & \code{42} \\\hline
+
+float & An immutable floating point number (system-defined precision). & 3.1415927\\\hline
+
+complex & immutable complex number with real and imaginary parts. & 3+2.7j\\\hline
+
+bool & immutable truth value. & \code{True False}\\\hline
+\end{tabular}
+
+\caption{python类型，来自维基百科}
+\end{table}
+
+\section{排序}
+\subsection{Python 字典排序}
+\begin{minted}{python}
+>>> lst = {'a': 100, 'b': 50, 'c': 1000}
+>>> sorted(lst.items(), key = lambda x: x[1])
+[('b', 50), ('a', 100), ('c', 1000)]
+\end{minted}
+
+
+\end{document}

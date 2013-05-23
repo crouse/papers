@@ -1,0 +1,61 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{Libexamples}\\\smallskip}%
+  {\LARGE \textsf{学习与反思}}
+}
+
+\author{Qu Qinglei 编写 \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+
+\section{基本输入输出标准库\code{stdio}}
+\subsection{\code{fgets()}}
+\begin{minted}{c}
+/* [name:fgets.c] */
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+int main()
+{
+	char buf[200];
+	FILE *fp = NULL;
+	if (access("./fgets.c", R_OK)) {
+		printf("No such file!\n");
+		exit(-1);
+	}
+
+	fp = fopen("./fgets.c", "r");
+	while(fgets(buf, 200, fp))
+		printf("%s", buf);
+	fclose(fp);
+
+	printf("Please input one line here: ");
+	fgets(buf, 200, stdin);
+	printf("%s", buf);
+
+	return 0;
+}
+\end{minted}
+\end{document}
