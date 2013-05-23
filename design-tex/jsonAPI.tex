@@ -39,6 +39,30 @@
     "plugType": "parser",
 }
 \end{minted}
+\textsf{安装插件的过程}
+\begin{itemize}
+\item[(1)] 在WEBUI端先上传插件，上传至\dirname{/tmp/plugin/}
+\item[(2)] 执行安装插件命令，调用python安装脚本，python程序先解包后释放到\dirname{/opt/crouse/lib/plugin}
+\item[(3)] 在数据库中添加这个插件的路径、名称、类型等
+\item[(4)] python处理完以上工作后，发送命令给后台守护进程，后台守护进程会根据要求安装到内存
+\end{itemize}
+
+\subsection{插件配置}
+\begin{minted}{js}
+{
+    "type": "setPluginState",
+    "plugName": "messageParser",
+    "status": false
+}
+\end{minted}
+\textsf{插件是否启用}\footnote{默认的情况下插件在安装后会直接启用，此功能提供使插件启用或者不启用}
+\begin{itemize}
+\item[(1)] WEBUI 可以从数据库中读取所有插件，并提供搜索功能，用户选择插件
+\item[(2)] 用户对插件设置启用或者不启用后，点击提交表单，调用插件配置功能
+\item[(3)] 执行python脚本根据提交的表单发送命令到后台守护进程，守护进程根据配置要求执行从内存中去掉插件或者
+把插件插入到内存
+\item[(4)] 执行完以上三步后更改数据库状态
+\end{itemize}
 
 \subsection{删除插件的命令}
 \begin{minted}{js}
@@ -49,6 +73,13 @@
     "dropDatabase": true
 }
 \end{minted}
+\textsf{删除插件的过程}
+\begin{itemize}
+\item[(1)] 用户在WEBUI上找到删除插件功能，浏览插件
+\item[(2)] 用户选择要删除的插件，然后按确定提交表单
+\item[(3)] python接收到删除插件的命令后会通知后台守护进程
+\item[(4)] 后台守护进程会从内存中删掉插件，并从硬盘中删除该插件文件，并设置插件表为已删除
+\end{itemize}
 
 
 %[B]
