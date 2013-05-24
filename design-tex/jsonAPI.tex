@@ -102,6 +102,20 @@
 }
 \end{minted}
 
+\subsection{上传文件分析}
+\begin{minted}{js}
+{
+    "type": "addData",
+    "dataType": "messages",
+}
+\end{minted}
+\textsf{上传文件以及后台执行过程}
+\begin{itemize}
+\item[(1)] 前台程序把日志数据上传至\dirname{/tmp/data/}
+\item[(2)] 调用后台守护进程，fork一个新的线程，读取文件并发送到\o mq\footnote{我们统一把所有数据发送
+到zeromq进行统一处理}
+\item[(3)] 线程处理完毕后会清空\dirname{/tmp/data/}路径的所有内容
+\end{itemize}
 %[C]
 \section{报警管理}
 \subsection{添加报警条件的命令}

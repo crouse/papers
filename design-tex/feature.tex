@@ -1,0 +1,49 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{Data Audit System Design}\\\smallskip}%
+  {\LARGE \textsf{\o Features}}
+}
+
+\author{Qu Qinglei 编写 \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+
+
+%[A]
+\section{数据审计系统的特性}
+\begin{description}
+\item[权限划分] 默认情况下会对不同类别的用户赋予不同的权限
+\item[备份] 支持自动化智能备份，不需要人工干预
+\item[插件] 对于特定的日志解析器采用插件的方式
+\item[报警] 提供自定义的报警方式，并对一些日志提供默认报警逻辑
+\item[过滤器] 用户可以设置对某些类型的日志进行过滤，用户只需要输入其关心的内容
+\item[分布式部署] 支持简洁的部署方案
+\end{description}
+
+
+\end{document}
+
+
+

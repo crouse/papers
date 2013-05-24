@@ -1,0 +1,65 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{tex-live-zh-cn, indentfirst}
+
+\begin{document}
+
+\title{%
+  {\huge \textit{Data Audit System Design}\\\smallskip}%
+  {\LARGE \textsf{configurations}}
+}
+
+\author{Qu Qinglei 编写 \\[3mm]
+        \email{quqinglei@icloud.com}
+       }
+
+\date{2013 年 5 月}
+
+\maketitle
+
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+
+
+%[A]
+\section{路径介绍}
+\subsection{程序路径}
+\begin{tabular}{|p{4cm}|p{5cm}|p{5cm}|}
+\hline
+\textit{路径名} & \textit{作用} & \textit{备注}\\\hline
+\dirname{/opt/crouse/} & \it{程序安} & \it{None}\\\hline
+\dirname{/opt/crouse/bin/} & \it{二进制程序，守护进程等} & \it{None}\\\hline
+\dirname{/opt/crouse/document/} & \it{类似如使用手册之类的文档} & \it{None}\\\hline
+\dirname{/opt/crouse/lib/} & \it{一些动态连接库的位置} & \it{None}\\\hline
+\dirname{/opt/crouse/log/} & \it{存放系统产生日志位置} & \it{None}\\\hline
+\dirname{/opt/crouse/memoryDB/} & \it{采用tmpfs内存盘的路径} & \it{None}\\\hline
+\dirname{/opt/crouse/mongodb/} & \it{mongodb数据库的安装路径} & \it{None}\\\hline
+\dirname{/opt/crouse/plugin/} & \it{存放插件的位置} & \it{None}\\\hline
+\dirname{/opt/crouse/tools/} & \it{一些常用到的脚本文件} & \it{None}\\\hline
+\dirname{/opt/crouse/webui/} & \it{存放webui的位置} & \it{None}\\\hline
+\end{tabular}
+
+
+\subsection{其他路径}
+\begin{tabular}{|p{4cm}|p{5cm}|p{5cm}|}
+\hline
+\textit{路径名} & \textit{作用} & \textit{备注}\\\hline
+\dirname{/tmp/plugin/} & \it{用户上传插件到此路径} & \it{None}\\\hline
+\dirname{/tmp/data/} & \it{用户上传数据路径} & \it{None}\\\hline
+\end{tabular}
+
+
+\end{document}
+
+
+
