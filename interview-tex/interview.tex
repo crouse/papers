@@ -443,17 +443,16 @@ Server5 76%
 \end{minted}
 
 
-
 \section{websense面试，职位：C工程师}
 \subsection{Part 1 Basic Skills}
 \subsubsection{Explain the differences between a static library and a dynamic library in Linux System}
-\begin{itemize}
+\begin{description}
 \item[(static) lib]Static libraries (.a): Library of object code which is linked with, and becomes part of the application.
 \item[(dll-A)]Dynamically linked shared object libraries (.so): There is only one form of this library but it can be used in two ways.
 \item[(dll-B)]Dynamically linked at run time but statically aware. The libraries must be available during compile/link phase. 
 \item[(dll-C)]The shared objects are not included into the executable component but are tied to the execution.
 \item[(dll-D)]Dynamically loaded/unloaded and linked during execution (i.e. browser plug-in) using the dynamic linking loader system functions.
-\end{itemize}
+\end{description}
 
 \subsubsection{What are the Linux inter-process communication (IPC) mechanisms? How can a parent
 process communicate with its child process(es)}
