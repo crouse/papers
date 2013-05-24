@@ -42,26 +42,8 @@
 \textsf{安装插件的过程}
 \begin{itemize}
 \item[(1)] 在WEBUI端先上传插件，上传至\dirname{/tmp/plugin/}
-\item[(2)] 执行安装插件命令，调用python安装脚本，python程序先解包后释放到\dirname{/opt/crouse/lib/plugin}
+\item[(2)] 执行安装插件命令，调用python安装脚本，python程序先解包后释放到\dirname{/opt/crouse/plugin}
 \item[(3)] 在数据库中添加这个插件的路径、名称、类型等
-\item[(4)] python处理完以上工作后，发送命令给后台守护进程，后台守护进程会根据要求安装到内存
-\end{itemize}
-
-\subsection{插件配置}
-\begin{minted}{js}
-{
-    "type": "setPluginState",
-    "plugName": "messageParser",
-    "status": false
-}
-\end{minted}
-\textsf{插件是否启用}\footnote{默认的情况下插件在安装后会直接启用，此功能提供使插件启用或者不启用}
-\begin{itemize}
-\item[(1)] WEBUI 可以从数据库中读取所有插件，并提供搜索功能，用户选择插件
-\item[(2)] 用户对插件设置启用或者不启用后，点击提交表单，调用插件配置功能
-\item[(3)] 执行python脚本根据提交的表单发送命令到后台守护进程，守护进程根据配置要求执行从内存中去掉插件或者
-把插件插入到内存
-\item[(4)] 执行完以上三步后更改数据库状态
 \end{itemize}
 
 \subsection{删除插件的命令}
@@ -93,6 +75,14 @@
     "description": "about this kind of message, can be null."
 }
 \end{minted}
+\textsf{过程}
+\begin{itemize}
+\item[(1)] 用户在配置中心找到“添加监听端口”，点击进入监听配置对话框
+\item[(2)] 选择日志类型$\rightarrow$填写监听端口$\rightarrow$填写描述信息，可以不填写$\rightarrow$点击确定
+\item[(3)] python 在处理无误后发送命令给后台守护进程
+\item[(4)] 后台会根据配置fork一个新的线程去监听此端口的日志，如果是插件支持的日志类型系统会自动启动插件
+\end{itemize}
+
 
 \subsection{删除监听日志的命令}
 \begin{minted}{js}
