@@ -3,11 +3,16 @@
 TEX = xelatex -shell-escape -8bit
 doc = jsonAPI
 source = $(doc).tex
+mq = 0mq.tex
 pdf = $(doc).pdf
 
-all: $(pdf)
+all: $(pdf) mq.pdf
 
 $(pdf): $(source) tex-live-zh-cn.sty
+	$(env) $(TEX) $<
+	$(env) $(TEX) $<
+
+mq.pdf: $(mq) tex-live-zh-cn.sty
 	$(env) $(TEX) $<
 	$(env) $(TEX) $<
 
