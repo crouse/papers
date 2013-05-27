@@ -31,6 +31,11 @@
 
 %IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 
+\section{sshpass工具}
+\begin{minted}{sh}
+sshpass -p123456 ssh user@192.168.1.2 df | grep /dev/sda1 | awk '{print $5}'
+\end{minted}
+
 \section{strace 系统调用追踪工具}
 这个工具可用来跟踪进程的系统调用状态，下面是一个简单的例子，我们跟踪的是
 vsftpd这个进程的系统调用过程。

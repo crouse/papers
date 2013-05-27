@@ -326,7 +326,8 @@ rename 's/log/txt/g' /tmp/*.log
 
 \subsubsection{使用脚本语言，如何将字符串abcde以空格为分割保存到数组array里}
 \begin{minted}{sh}
-[tbd]
+declare -a array
+array=(a b c d)
 \end{minted}
 
 
@@ -388,6 +389,49 @@ b. 检查当前服务器/和/home分区磁盘占用情况，当超出阀值就�
 c. 清理日志后发送邮件给指定人员，报告清理之前、清理之后磁盘占用情况
 
 \begin{minted}{sh}
+#!/bin/bash
+#clean.sh
+TRUE=1
+FALSE=0
+
+email_to_user()
+{
+	before_clean_status=$1
+	after_clean_status=$2
+	admin=$3
+	msg="Before clean: $before_clean_status \
+		After clean: $after_clean_status"
+	#send mail msg
+}
+
+get_status()
+{
+	# get_status $1
+	root_status=`df -P / | grep / | awk '{print $5}' | tr -d %`
+	home_status=`df -P /home | grep / | awk '{print $5}' | tr -d %`
+
+	if (( $root_status > $1 || $home_status > $1  )); then
+		return $TRUE 
+	fi
+}
+
+action()
+{
+	b_status=`get_status $1`
+	if [ $status -eq 1 ]; then
+		echo "clean..."
+		# find {/,/home/} -mtime +30 -exec rm -rf {} +
+		a_status=`get_status $1`
+		email_to_user $b_status $a_status $2
+	fi
+}
+
+action
+
+
+#crontab -e  添加一行
+ # m h  dom mon dow   command
+0 1 * * * * /path-to-clean.sh
 
 \end{minted}
 
@@ -404,9 +448,42 @@ def3 100		def9 50
 
 #结果如下
 def9 50
+def3 100
 def1 150
 def2 150
-def3 100
+\end{minted}
+
+答曰：
+
+\begin{minted}{python}
+#!/usr/bin/python
+
+fa = open('./a.txt', 'r')
+fb = open('./b.txt', 'r')
+
+dic = {}
+
+for a in fa.readlines():
+	a_lst = a.strip('\n').split(' ')
+	a_name = a_lst[0]
+	a_value = a_lst[1]
+	
+	b = fb.readline()
+	b_lst = b.strip('\n').split(' ')
+	b_name = b_lst[0]
+	b_value = b_lst[1]
+
+	if a_name == b_name:
+		value = int(a_value) + int(b_value)
+		dic[a_name] = int(value)
+	else:
+		dic[a_name] = int(a_value)
+		dic[b_name] = int(b_value)
+
+	ans = sorted(dic.items(), key = lambda x: x[1])
+
+for x in ans:
+	print x[0], x[1]
 \end{minted}
 
 \subsubsection{处理以下文件内容，将域名取出并进行排序}
@@ -422,6 +499,40 @@ http://post.baidu.com/2.html
 2 post..baidu.com
 1 mp3.baidu.com
 
+\end{minted}
+
+答曰：
+
+\begin{minted}{python}
+#!/usr/bin/python
+def getDomainName(line):
+	start = 7
+	new = line[start:]
+	end = new.index('/') + 7
+	domain = line[start:end]
+	return domain
+
+def readFile():
+	f = open('./url.txt', 'r')
+	lines = f.readlines()
+	lst = []
+	for line in lines:
+		domain = getDomainName(line)
+		lst.append(domain)
+	return lst	
+
+def getResult():
+	lst = readFile()
+	numDic = {}
+	for item in set(lst):
+		numDic[item] = lst.count(item)
+	ans = sorted(numDic.items(), key = lambda x: x[1])
+	return ans
+
+lst = getResult()
+lst.reverse()
+for x in lst:
+	print x[1], x[0]
 \end{minted}
 
 
@@ -441,6 +552,7 @@ Server3 10%
 Server4 45%
 Server5 76%
 \end{minted}
+答曰：这个问题可以使用snmp去收集信息，也可以使用sshpass，但是没有密码，只能用snmp协议去收集数据了。
 
 
 \section{websense面试，职位：C工程师}
