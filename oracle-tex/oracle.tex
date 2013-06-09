@@ -1,0 +1,447 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{oracle notes}\\\smallskip}%
+  {\small \textit{关于oracle的笔记}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 5 月}}
+
+\maketitle
+\newpage
+\begin{multicols}{2}
+\tableofcontents
+%\listoftables
+\end{multicols}
+\newpage 
+
+\section{常识}
+\begin{itemize}
+\item[(1)]
+在\code{windows}下安装完毕后，可以在命令提示符里输入：
+\code{sqlplus "/as sysdba"} 可直接进入其\code{shell}。
+
+\item[(2)]
+如果需要在命令提示符内执行某个脚本：
+脚本文件位置:\dirname{D://sqlscripts/test.sql}
+执行步骤：\code{SQL> @D://sqlscripts/test.sql}
+
+\item[(3)]
+打开服务端的标准输出命令：
+\code{SQL> set serveroutput on}
+\end{itemize}
+
+\section{常用函数}
+\code{nvl(x, 0)} 如果x为空，则替换为0
+
+\section{常用语句}
+\subsection{JOIN}
+\begin{minted}{sql}
+-- create tc td
+create tc(id number, name varchar2(20), address varchar2(50));
+create td(id number, sex varchar2(5), job varchar2(50));
+
+-- insert data to tc td
+insert into tc values(1, '张三', '北京市昌平区');
+insert into td values(1, '男', '程序员');
+
+-- query from tc td
+select tc.id, tc.name, tc.address, td.sex, td.job from tc left join
+td on td.id = tc.id;
+\end{minted}
+
+\section{存储过程}
+\subsection{简单的例子}
+\subsubsection{匿名块的例子}
+\begin{minted}{sql}
+--hello.sql
+declare 
+	message varchar2(20) := 'Hello world';
+begin
+	dbms_output.put_line(message);
+end;
+/
+\end{minted}
+\subsubsection{标准的存储过程}
+\begin{minted}{sql}
+--hello.sql
+create or replace procedure test
+as
+	message varchar2(20) := 'Hello world';
+begin
+	dbms_output.put_line(message);
+end test;
+\end{minted}
+
+\subsection{变量声明}
+\begin{minted}{sql}
+declare
+	num1 integer;
+	num2 real;
+	num3 double precision;
+begin
+	null;
+end;
+/
+\end{minted}
+
+\subsection{自定义类型}
+\begin{minted}{sql}
+declare 
+	subtype name IS char(20); 
+	subtype message IS varchar2(100);
+	salutation name;
+	greeting message;
+begin
+	salutation := 'Reader ';
+	greeting := 'Welcome to the World of PL/SQL';
+	dbms_output.put_line('Hello ' || salutation || greetings);
+end
+/
+\end{minted}
+
+\subsection{变量初始化}
+\begin{minted}{sql}
+declare
+	a integer := 10;
+	b integer := 20;
+	c integer;
+	f real;
+begin
+	c := a + b;
+	dbms_output.put_line('Value of c: ' || c);
+	f := 70.0/3.0;
+	dbms_output.put_line('Value of f: || f);
+end;
+/
+\end{minted}
+
+\subsection{局部变量和全局变量}
+\begin{minted}{sql}
+declare
+	-- Global variables
+	num1 number := 95;
+	num2 number := 85;
+begin
+	dbms_output.put_line('Outer Variable num1: ' || num1);
+	dbms_output.put_line('Outer Variable num2: ' || num2);
+	--<
+	declare
+		-- Local variables
+		num1 number := 195;
+		num2 number := 185;
+	begin
+		dbms_output.put_line('Inner Variable num1: ' || num1);
+		dbms_output.put_line('Inner Variable num2: ' || num2);
+	end;
+	-->
+end;
+/
+\end{minted}
+
+\subsection{指定查询结果为变量的值}
+\textsf{返回到\code{if02}处}~\ref{call01}
+\label{table01}
+\begin{minted}{sql}
+-- create a table
+create table customers (
+	ID int not null,
+	name varchar(20) not null,
+	age int not null,
+	address char(25),
+	salary decimal(18, 2),
+	primary key (ID)
+);
+
+-- insert values to this table
+insert into customers (id,name,age,address,salary)
+values (1, 'Ramesh', 32, 'Ahmedabad', 2000.00 );
+insert into customers (id,name,age,address,salary)
+values (2, 'Khilan', 25, 'Delhi', 1500.00 );
+insert into customers (id,name,age,address,salary)
+values (3, 'kaushik', 23, 'Kota', 2000.00 );
+insert into customers (id,name,age,address,salary)
+values (4, 'Chaitali', 25, 'Mumbai', 6500.00 );
+insert into customers (id,name,age,address,salary)
+values (5, 'Hardik', 27, 'Bhopal', 8500.00 );
+insert into customers (id,name,age,address,salary)
+values (6, 'Komal', 22, 'MP', 4500.00 );
+
+-- procedure
+declare
+	c_id customers.id%type := 1;
+	c_name customer.name%type;
+	c_addr customer.address%type;
+	c_sal customer.salary%type;
+begin
+	select name, address, salary into c_name, c_addr, c_sal
+	from customers
+	where id = c_id;
+	
+	dbms_output.put_line
+	('Customer ' || c_name || ' from ' || c_addr || ' earns ' || c_sal);
+end;
+/
+\end{minted}
+
+\subsection{声明常量}
+\begin{minted}{sql}
+declare
+	-- constant declaration
+	pi constant number := 3.141592654;
+	-- other declaration
+	radius number(5, 2);
+	dia number(5, 2);
+	circumference number(7, 2);
+	area number(10, 2);
+begin
+	-- processing
+	radius := 9.5;
+	dia := radius * 2;
+	circumference := 2.0 * pi * radius;
+	area := pi * radius * radius;
+	-- output
+	dbms_output.put_line('Radius: ' || radius);
+	dbms_output.put_line('Diameter: ' || dia);
+	dbms_output.put_line('Circumference: ' || circumference);
+	dbms_output.put_line('Area: ' || area);
+end;
+/
+\end{minted}
+
+\subsection{判断语句}
+\begin{minted}{sql}
+declare
+	a number (2) := 21;
+	b number (2) := 10;
+begin
+	if (a = b) then
+		dbms_output.put_line('Line 1: a is equal to b');
+	else
+		dbms_output.put_line('Line 1: a is not equal to b');
+	end if;
+
+	if (a < b) then
+		dbms_output.put_line('Line 2: a is less than b');
+	else
+		dbms_output.put_line('Line 2: a is not less than b');
+	end if;
+
+	if (a > b) then
+		dbms_output.put_line('Line 3: a is greater than b');
+	else
+		dbms_output.put_line('Line 3: a is not greater than b');
+	end if;
+
+	-- Lets change value of a and b
+	a := 5;
+	b := 20;
+	if (a <= b) then
+		dbms_output.put_line('Line 4: a is either equal or less than b');
+	end if;
+		
+	if (b >= a) then
+		dbms_output.put_line('Line 5: b is either equal or greater than a');
+	end if;
+
+	if (a <> b) then
+		dbms_output.put_line('Line 5: a is not equal to b');
+	end if;
+end;
+/
+\end{minted}
+
+\subsection{\code{LIKE}}
+\begin{minted}{sql}
+declare procedure compare (value varchar2, pattern varchar2) is
+begin
+	if value like pattern then
+		dbms_output.put_line('True');
+	else
+		dbms_output.put_line('False');
+	end if;
+end;
+
+begin
+	compare('Zara Ali', 'Z%A_i');
+	compare('Nuha Ali', 'Z%A_i');
+end;
+/
+\end{minted}
+
+\subsection{\code{BETWEEN}}
+\begin{minted}{sql}
+declare
+	x number(2) := 10;
+begin
+	if (x between 5 and 20) then
+		dbms_output.put_line('True');
+	else
+		dbms_output.put_line('False');
+	end if;
+\end{minted}
+
+\subsection{\code{IN and IS NULL}}
+\begin{minted}{sql}
+declare
+	letter varchar2(1) := 'm';
+begin
+	if (letter in ('a', 'b', 'c')) then
+		dbms_output.put_line('True');
+	else
+		dbms_output.put_line('False');
+	end if;
+
+	if (letter in ('m', 'n', 'o')) then
+		dbms_output.put_line('True');
+	else
+		dbms_output.put_line('False');
+	end if;
+
+	if (letter is null) then
+		dbms_output.put_line('True');
+	else
+		dbms_output.put_line('False');
+	end if;
+end;
+/
+\end{minted}
+
+\subsection{\code{Logic Operators: and/or/not}}
+\begin{minted}{sql}
+declare
+	a boolean := true;
+	b boolean := false;
+begin
+	if (a and b) then
+		dbms_output.put_line('Line 1: Condition is true');
+	end if;
+
+	if (a or b) then
+		dbms_output.put_line('Line 2: Condition is true');
+	end if;
+
+	if (not a) then
+		dbms_output.put_line('Line 3: a is not true');
+	end if;
+
+	if (not b) then
+		dbms_output.put_line('Line 4: b is not true');
+	else
+		dbms_output.put_line('Line 4: b is true');
+	end if;
+
+\end{minted}
+
+\subsection{算术操作}
+\begin{minted}{sql}
+declare 
+	a number(2) := 20;
+	b number(2) := 10;
+	c number(2) := 15;
+	d number(2) := 5;
+	e number(2);
+
+begin
+	e := (a + b) * c / d;	--(30 * 15) / 5
+	dbms_output.put_line('Value of (a + b) * c / d is: ' || e);
+
+	e := ((a + b) * c) / d;	--(30 * 15) / 5
+	dbms_output.put_line('Value of ((a + b) * c) / d is: ' || e);
+
+	e := (a + b) * (c / d);	-- (30) * (15 / 5)
+	dbms_output.put_line('Value of (a + b) * (c / d) is: ' || e);
+
+	e := a + (b * c) / d;	-- 20 + (150 / 5)
+	dbms_output.put_line('Value of a + (b * c) / d is: ' || e);
+
+end;
+/
+\end{minted}
+
+\subsection{条件}
+\subsubsection{\code{if-then-endif}}
+\begin{minted}{sql}
+declare
+	a number(2) := 10;
+begin
+	a := 10;
+	-- check the boolean condition using if statement
+	if (a < 20) then
+		dbms_output.put_line('a is less than 20');
+	end if;
+	dbms_output.put_line('value of a is: ' || a);
+end;
+/
+\end{minted}
+
+\subsubsection{\code{if02}}
+\textsf{关于表请参考~\ref{table01}处的例子}
+\label{call01}
+\begin{minted}{sql}
+declare 
+	c_id customers.id%type := 1;
+	c_sal customers.salary%type;
+begin
+	select salary
+	into c_sal
+	from customers
+	where id = c_id;
+	if (c_sal <= 2000) then
+		update customers
+		set salary = salary + 1000
+		where id = c_id;
+		dbms_output.put_line('Salary updated');
+	end if;
+end;
+/
+\end{minted}
+
+\subsubsection{\code{if-then-elsif-else-end if}}
+\begin{minted}{sql}
+declare
+	a number(3) := 100;
+begin
+	if (a = 10) then
+		dbms_output.put_line('Value of a is 10');
+	elsif (a = 20) then
+		dbms_output.put_line('Value of a is 20');
+	elsif (a = 30) then
+		dbms_output.put_line('Value of a is 30');
+	else
+		dbms_output.put_line('None of the values is matching');
+	end if;
+	dbms_output.put_line('Exact value of a is: ' || a);
+end;
+/
+\end{minted}
+
+%\subsection{}
+%\begin{minted}{sql}
+%\end{minted}
+\section{附录}
+
+\section{尾注}
+\subsection{参考}
+\begin{itemize}
+\item[(1)] 本文的所有例子基本来自网络，如有侵权请联系本人，本文档按照GPL协议发布。
+\item[(2)] 参考网站：\url{http://tutorialspoint.com}
+\end{itemize}
+\end{document}
+
+
