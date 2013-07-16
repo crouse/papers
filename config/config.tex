@@ -23,16 +23,271 @@
 \date{\textit{2013 年 7 月}}
 
 \maketitle
-\newpage
 \begin{multicols}{2}
 \tableofcontents
 %\listoftables
 \end{multicols}
-\newpage 
 
-\section{安装hadoop集群}
-\subsection{第一步，自然是先现在安装包}
-去hadoop的官网，下载如：\dirname{hadoop-1.1.2-bin.tar.gz} 格式的安装包，也可以下载如：
-\dirname{hadoop-1.1.2.tar.gz}格式的安装包，此包中包含源代码。
+\section{配置\code{JAVA}环境}
+\subsection{配置\code{JAVA\_HOME}}
+\textit{需要根据系统位数下载不同的安装包，如：32位的\code{jdk-7u25-linux-i586.gz}，或者64位的\code{jdk-7u25-linux-x64.tar.gz}
+建议去甲骨文官网下载。
+}
+
+\textsf{例子：}
+\begin{minted}{sh}
+tar xzv jdk-7u25-linux-i586.gz -C /opt
+cd /opt
+ln -s jdk1.7.0_25 jdk
+echo "export JAVA_HOME=/opt/jdk" >> /etc/profile
+source /etc/profile
+\end{minted}
+
+\section{\code{Hadoop}安装包}
+\textit{由于在Linux下有很多安装方式，为了统一，本次采用解压包介绍。}
+\textit{去Hadoop的官网，找到Hadoop的下载地址，在稳定版本里挑一个下载，本例中采用的包为：\code{hadoop-1.1.2.tar.gz}}
+
+
+\section{Hadoop 集群安装实例}
+\textit{本例中有三台机器参与，一台master，两台slave，配置比较简单}
+
+\subsection{说明}
+\begin{description}
+\item[192.168.1.5] 此台机器作为\code{master}
+\item[192.168.1.6] 此台机器作为\code{slave01}
+\item[192.168.1.7] 此台机器作为\code{slave02}
+\end{description}
+
+\subsection{第二步，配置hosts}
+\textit{配置Hosts：}
+编辑\code{master}机器的\dirname{/etc/hosts}文件，添加内容为如下所示：
+
+\begin{minted}{sh}
+192.168.1.5 master
+192.168.1.6 slave01
+192.168.1.7 slave02
+\end{minted}
+
+同步此配置文件到其它两台机器，保持一致即可。
+
+\subsection{第三步，配置\code{JAVA\_HOME}见上述章节}
+
+\subsection{第四步，建立新用户，并解压安装包}
+\begin{minted}{sh}
+useradd -m hadoop
+passwd hadoop #设置密码
+su hadoop
+cd /home/hadoop
+tar xzf hadoop-1.1.2.tar.gz 
+ln -s hadoop-1.1.2 hadoop
+#hadoop 的家路径此时为：/home/hadoop/hadoop
+\end{minted}
+
+\subsection{第四步，配置\code{ssh}无密码访问}
+\textit{其实就是交换公匙}
+\begin{minted}{sh}
+# machine master, 使用hadoop用户
+ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys
+scp ~/.ssh/id_dsa.pub hadoop@192.168.1.6:/home/hadoop/.ssh/authorized_keys_master
+scp ~/.ssh/id_dsa.pub hadoop@192.168.1.6:/home/hadoop/.ssh/authorized_keys_master
+
+# slave01, 使用hadoop用户
+ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys
+cat ~/.ssh/authorized_keys_master >> ~/.ssh/authorized_keys
+scp ~/.ssh/id_dsa.pub hadoop@192.168.1.5:/home/hadoop/.ssh/authorized_keys_slave01
+
+# slave02, 使用hadoop用户
+ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys
+cat ~/.ssh/authorized_keys_master >> ~/.ssh/authorized_keys
+scp ~/.ssh/id_dsa.pub hadoop@192.168.1.5:/home/hadoop/.ssh/authorized_keys_slave02
+
+# master, 使用hadoop用户
+cat ~/.ssh/authorized_keys_slave01 >> ~/.ssh/authorized_keys
+cat ~/.ssh/authorized_keys_slave02 >> ~/.ssh/authorized_keys
+\end{minted}
+
+\textbf{注意：在CentOS下做的同学需要注意，一定要看看~/.ssh/authorized\_keys的权限是不是644，如果
+不是644，请\code{chmod 644 authorized\_keys}}
+
+\subsection{第五步，更改Hadoop配置文件}
+\begin{minted}{sh}
+su hadoop
+cd /home/hadoop/hadoop/conf/
+# 需要更改：masters, slaves, hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml
+\end{minted}
+
+\textit{更改结果如下所示：}
+
+\begin{minted}{sh}
+#masters 文件内容
+master
+
+#slaves 文件内容
+slave01
+slave02
+
+#hadoop-env.sh
+#仅仅需要更改JAVA_HOME那一行，更改为JAVA_HOME的实际路径，本例中我们采用的JAVA_HOME为：
+export JAVA_HOME=/opt/jdk
+\end{minted}
+
+\begin{minted}{xml}
+#core-site.xml 文件内容
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<property>
+<name>fs.default.name</name>
+<value>hdfs://master:9000</value>
+</property>
+</configuration>
+
+#hdfs-site.xml 文件内容
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<property>
+<name>dfs.name.dir</name>
+<value>/home/hadoop/hadoopfs/name1,/home/hadoop/hadoopfs/name2</value>
+</property>
+
+<property>
+<name>dfs.data.dir</name>
+<value>/home/hadoop/hadoopfs/data1,/home/hadoop/hadoopfs/data2</value>
+</property>
+
+<property>
+<name>dfs.replication</name>
+<value>2</value>
+</property>
+</configuration>
+
+#mapred-site.xml 文件内容
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<property>
+<name>mapred.job.tracker</name>
+<value>master:9200</value>
+</property>
+</configuration>
+\end{minted}
+
+\subsection{第六步，把hadoop打包，复制到其他两台机器}
+\textit{在配置完一台机器后，直接可以把配置好的hadoop复制到其他机器上，当然在其他的
+机器上的位置应该是一样的}
+
+\subsection{完毕}
+基本配置完毕，在主机的\dirname{/home/hadoop/hadoop/bin}下执行：
+\code{./hadoop fs namenode -format} 格式化文件系统，然后就可以启动hadoop集群了，
+\code{./start-all.sh}即可启动hadoop集群
+
+\begin{minted}{sh}
+cd /home/hadoop/hadoop
+./hadoop fs namenode -format
+./start-all.sh
+\end{minted}
+
+如果成功，我们可以在其他机器上都能看到hadoop的进程，并且在\dirname{/home/hadoop/}会看到\dirname{/home/hadoop/hadoopfs}的路径
+出现。
+
+\section{编译Hadoop的FUSE模块，机器一定要能上网}
+\textit{如果想在其他机器上挂载HDFS，则需要编译 fuse\_dfs 模块}
+\subsection{编译前的软件依赖安装}
+\begin{minted}{sh}
+# 如果系统是基于Redhat的，请使用yum安装，如果基于debian，使用apt-get 安装，具体如下：
+yum install install automake autoconf m4 libtool pkgconfig fuse fuse-devel fuse-libs
+
+apt-get install automake autoconf m4 libtool libextutils-pkgconfig-perl fuse libfuse-dev lrzsz build-essential
+\end{minted}
+
+\subsection{下载ant包，编译需要它}
+\begin{minted}{sh}
+tar xzf apache-ant-1.9.1-bin.tar.gz -C /opt
+cd /opt
+ln -s apache-ant-1.9.1 ant
+
+\end{minted}
+
+\subsection{设置环境变量}
+\textit{把下面环境变量写到\dirname{/etc/profile}文件里}
+\begin{minted}{sh}
+# add below to /etc/profile
+export JAVA_HOME=/opt/jdk
+export HADOOP_HOME=/home/hadoop/hadoop
+export OS_ARCH=i386 #or amd64
+export OS_BIT=32 #or 64
+export ANT_HOME=/opt/ant
+export PATH=$PATH:$ANT_HOME/bin
+export LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/$OS_ARCH/server:$HADOOP_HOME/build/c++/Linux-$OS_ARCH-$OS_BIT/lib:/usr/local/lib:/usr/lib
+\end{minted}
+
+\subsubsection{更新环境变量}
+\code{source /etc/profile}
+
+\subsubsection{编译HDFS}
+\begin{minted}{sh}
+cd /home/hadoop/hadoop # 进入hadoop的家路径
+ant compile-c++-libhdfs -Dlibhdfs=1 -Dcompile.c++=1 #编译libhdfs，机器一定要能上网，否则无法编译
+\end{minted}
+
+\subsection{编译fuse\_dfs}
+\begin{minted}{sh}
+# 进入hadoop家路径，执行
+ln -s c++/Linux-$OS_ARCH-$OS_BIT/lib build/libhdfs 
+ant compile-contrib -Dlibhdfs=1 -Dfusedfs=1 
+\end{minted}
+
+\textsf{如果以上不出错，则说明问题解决}
+编译完成后挂载就很简单了，但应该注意以下问题：
+\begin{itemize}
+\item[(1)] 编辑\dirname{/etc/ld.so.conf} 添加libhdfs.so文件的路径，或者可以直接把：\dirname{/home/hadoop/hadoop/c++/Linux-i386-32/lib/} 里
+的所有文件拷贝到\dirname{/usr/lib}路径，记得执行\code{ldconfig}
+\item[(2)] 可以把\dirname{/home/hadoop/build/contrib/fuse-dfs} 路径里的两个文件拷贝到\dirname{/usr/local/bin/} 但必须更改\dirname{fuse_dfs_wrapper.sh}
+的最后一行\code{./fuse\_dfs} 为：\code{/usr/local/bin/fuse\_dfs}, \dirname{fuse_dfs_wrapper.sh} 是个脚本，请给予执行权限，并可以更改里面的环境变量为
+真正的值，如果环境变量已设为全局，则不需要更改。
+\end{itemize}
+
+
+
+
+
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
