@@ -28,6 +28,11 @@
 %\listoftables
 \end{multicols}
 
+\section{环境变量}
+本例中采用和很多环境变量，如：\code{JAVA\_HOME HADOOP\_HOME} 等等，建议在做以下工作的时候，先找一个文本文件，把环境变量都写好，
+然后在写入\dirname{/etc/profile} 文件，当然有些环境变量只是在编译的时候使用，这个你可以根据情况酌情处理，当然环境变量都导出来
+也是没有什么问题的。
+
 \section{配置\code{JAVA}环境}
 \subsection{配置\code{JAVA\_HOME}}
 \textit{需要根据系统位数下载不同的安装包，如：32位的\code{jdk-7u25-linux-i586.gz}，或者64位的\code{jdk-7u25-linux-x64.tar.gz}
@@ -232,7 +237,7 @@ export OS_ARCH=i386 #or amd64
 export OS_BIT=32 #or 64
 export ANT_HOME=/opt/ant
 export PATH=$PATH:$ANT_HOME/bin
-export LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/$OS_ARCH/server:\ 
+export LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/$OS_ARCH/server: \
 	$HADOOP_HOME/build/c++/Linux-$OS_ARCH-$OS_BIT/lib:/usr/local/lib:/usr/lib
 \end{minted}
 
@@ -263,15 +268,130 @@ ant compile-contrib -Dlibhdfs=1 -Dfusedfs=1
 \end{itemize}
 
 
+\section{编译并执行经典的例子程序WordCount}
+\subsection{例子代码}
+\textit{此例子是经过改动的，如果直接使用Hadoop官网的例子在新版本的Hadoop 1.1.2会出错，改动处有标记。}
+\begin{minted}{java}
+// WordCount.java
+package org.myorg;
 
+import java.io.IOException;
+import java.util.*;
+
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+public class WordCount {
+
+	public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+		private final static IntWritable one = new IntWritable(1);
+		private Text word = new Text();
+
+		public void map(LongWritable key, Text value, Context context) 
+			throws IOException, InterruptedException {
+				String line = value.toString();
+				StringTokenizer tokenizer = new StringTokenizer(line);
+				while (tokenizer.hasMoreTokens()) {
+					word.set(tokenizer.nextToken());
+					context.write(word, one);
+				}
+			}
+	} 
+
+	public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+		public void reduce(Text key, Iterable<IntWritable> values, Context context) 
+			throws IOException, InterruptedException {
+				int sum = 0;
+				for (IntWritable val : values) {
+					sum += val.get();
+				}
+				context.write(key, new IntWritable(sum));
+			}
+	}
+
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+
+		Job job = new Job(conf, "wordcount");
+
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
+		job.setJarByClass(WordCount.class); // 多加了这一行！！！
+
+		job.setMapperClass(Map.class);
+		job.setReducerClass(Reduce.class);
+
+		job.setInputFormatClass(TextInputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
+
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+		job.waitForCompletion(true);
+	}
+
+}
+\end{minted}
+
+\subsection{编译过程}
+\textit{废话少说，直接看Makefile和文件列表，我觉得模仿是最好的学习方式}
+
+\begin{minted}{sh}
+hadoop@debian:~/testHadoop/wordcount$ tree 
+.
+├── Makefile #用来编译例子的 Makefile
+├── run.sh #用来执行的，其实里面就是一行命令，我懒得记
+├── wordcount_classes #这是个空的文件夹，用于放编译完的CLASS文件
+└── WordCount.java #这个是上面那个例子的源文件
+
+1 directory, 3 files
+\end{minted}
+
+\begin{minted}{sh}
+# Makefile 内容
+all: wordcount jarpackage
+
+wordcount: 
+	javac -classpath ${CLASSPATH} -d  wordcount_classes WordCount.java
+
+jarpackage:
+	jar -cvf wordcount.jar -C wordcount_classes/ . 
+
+clean:
+	rm -rf wordcount_classes/*
+	rm -f wordcount.jar
+
+# run.sh 内容
+#!/bin/bash
+
+hadoop fs -rmr /user/hadoop/output/ # output 路径不能存在，否则执行失败
+hadoop jar wordcount.jar org.myorg.WordCount input output 
+# input output 默认是在/user/hadoop/input /user/hadoop/output
+# 如果input路径不是这个请写绝对路径
+
+# 编译后的wordcount_classes 路径：
+hadoop@debian:~/testHadoop/wordcount$ tree wordcount_classes/
+wordcount_classes/
+└── org
+    └── myorg
+        ├── WordCount.class
+        ├── WordCount$Map.class
+        └── WordCount$Reduce.class
+
+2 directories, 3 files
+\end{minted}
+
+\textsf{注意：执行run.sh时，注意org.myorg.WordCount是否和上面的wordcount\_classes 结构一致！}
 
 
 \end{document}
-
-
-
-
-
 
 
 
