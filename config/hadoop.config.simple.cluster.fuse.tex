@@ -210,7 +210,8 @@ cd /home/hadoop/hadoop
 # 如果系统是基于Redhat的，请使用yum安装，如果基于debian，使用apt-get 安装，具体如下：
 yum install install automake autoconf m4 libtool pkgconfig fuse fuse-devel fuse-libs
 
-apt-get install automake autoconf m4 libtool libextutils-pkgconfig-perl fuse libfuse-dev lrzsz build-essential
+apt-get install automake autoconf m4 libtool libextutils-pkgconfig-perl \
+	 fuse libfuse-dev lrzsz build-essential
 \end{minted}
 
 \subsection{下载ant包，编译需要它}
@@ -231,7 +232,8 @@ export OS_ARCH=i386 #or amd64
 export OS_BIT=32 #or 64
 export ANT_HOME=/opt/ant
 export PATH=$PATH:$ANT_HOME/bin
-export LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/$OS_ARCH/server:$HADOOP_HOME/build/c++/Linux-$OS_ARCH-$OS_BIT/lib:/usr/local/lib:/usr/lib
+export LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/$OS_ARCH/server:\ 
+	$HADOOP_HOME/build/c++/Linux-$OS_ARCH-$OS_BIT/lib:/usr/local/lib:/usr/lib
 \end{minted}
 
 \subsubsection{更新环境变量}
