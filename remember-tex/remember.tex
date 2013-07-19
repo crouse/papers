@@ -34,9 +34,16 @@
 \subsection{javac 可以编译，但执行java报错}
 \begin{description}
 \item[原因一] 你可能安装了两个JDK，或者存在两个java命令的路径，而执行javac和java所使用的是两个不同的版本，建议
-使用\code{where is java} 看一下到底安装了几个，实在不行可以使用绝对路径编译执行。如：\code{/usr/bin/javac xx.java 
+使用\code{whereis java} 看一下到底安装了几个，实在不行可以使用绝对路径编译执行。如：\code{/usr/bin/javac xx.java 
  /usr/bin/java xx}。
 \end{description}
+
+\begin{minted}{sh}
+# java 编译运行环境变量设置，只需要这两项，其他不需要，建议在export PATH的时候把 java的PATH放在前面
+# 这样可以避免本机存在多个java环境导致的错误！
+export JAVA_HOME=/opt/jdk
+export PATH=$JAVA_HOME/bin:$PATH
+\end{minted}
 
 
 \end{document}
