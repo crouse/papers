@@ -30,11 +30,13 @@
 \end{multicols}
 \newpage 
 
-\section{一些需要经常重新学习的书籍和知识}
-一些重要的书籍《汇编语言》《操作系统》《计算机组成》《算法与数据结构》《网络》
+\section{JAVA}
+\subsection{javac 可以编译，但执行java报错}
+\begin{description}
+\item[原因一] 你可能安装了两个JDK，或者存在两个java命令的路径，而执行javac和java所使用的是两个不同的版本，建议
+使用\code{where is java} 看一下到底安装了几个，实在不行可以使用绝对路径编译执行。如：\code{/usr/bin/javac xx.java 
+ /usr/bin/java xx}。
+\end{description}
 
-\section{成为一个高手真的很难啊}
-你需要精通操作系统、网络、计算机组成、算法与数据结构等等，而且还需要大型项目
-开发经验，天呢，这就是个不归路啊！
 
 \end{document}
