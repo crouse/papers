@@ -13,4 +13,4 @@ $(pdf): $(source) tex-live-zh-cn.sty tex-live.sty
 clean:
 	rm -f *.aux *.log *.blg *.toc *.out *.lot tex4ht.ps *.4*
 	rm -f *.xref* *.lg *.idv *.out *.otc *.tmp tmp.*
-	rm -f $(doc).dvi $(doc).ps *.pdf
+	rm -f $(doc).dvi $(doc).ps 
