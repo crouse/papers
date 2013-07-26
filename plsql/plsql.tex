@@ -1,0 +1,165 @@
+\documentclass{article}
+\let\tldocenglish=1
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+%\begin{minted}{python}
+%\end{minted}
+%\colorbox{blue}{text}
+%\textcolor{blue}{GEO}
+
+\begin{document}
+
+\title{
+  {\huge \textsf{PL/SQL 简明教程}\\\smallskip}
+  {\small \textit{翻译作品}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 7 月}}
+
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+
+\section{关于此文档}
+\subsection{PL/SQL 简明教程}
+PL/SQL 是添加了过程特性的一门编程语言，是甲骨文公司于九十年代初期开发的对SQL的增强实现。
+
+PL/SQL 是甲骨文数据库系统的三个关键点之一，其余的两个点为SQL本身，以及JAVA。
+
+本文档将会带给你一个对PL/SQL以及关系型数据库，比较容易理解的学习过程。
+
+\subsection{面向读者}
+本文档面向有熟练编程经验的专家，提供简单的学习方式。本文档会给你提供一个很容易理解的学习方式，当完成本文档
+的学习后，你有一个中级的能力。
+
+\subsection{先决条件}
+在看本书的时候，你需要对计算机科学有一定的了解，比如基本的软件概念，如什么是数据库，源代码，文本编辑器，程序运行
+方式，当然如果你懂SQL并且有其他语言的编程经验，那你可以比较轻松的学习了。
+
+\subsection{版权声明}
+\copyright 本文档里的所有内容、图片皆为\url{tutorialspoint.com}所有。来自此网站的任何内容或者本文档的内容，在没有
+经过同意下不允许任何形式的再发行。如果不如此做则违法版权法。
+
+此文档可能存在不准确或者错误，本网站并不承担任何担保，如果你找到了错误请联系\email{webmaster@tutorialspoint.com}
+
+
+\section{PL/SQL 总览}
+\textit{本章节介绍PL/SQL的基本概念和定义}
+\subsection{简介}
+PL/SQL 语言是甲骨文公司于二十世纪八十年代末发明的一种关系型数据库，下面是PL/SQL的一些可圈点的特点：
+\begin{itemize}
+\item 可移植、高性能的事务性处理语言
+\item 提供独立于操作系统的内建语言环境
+\item 可以直接通过命令行调用
+\item 可以直接通过外部程序调用
+\item 语法采用ADA和Pascal的语法格式
+\item 此语言不只是只适合甲骨文数据库，同样适用于TimesTen 内存数据库以及IBM DB2
+\end{itemize}
+
+\subsection{特性}
+\begin{itemize}
+\item 和SQL紧密关联
+\item 提供广泛的错误检查
+\item 提供很多的数据类型
+\item 提供结构化编程特性
+\item 提供函数以及过程调用
+\item 支持面向对象的编程
+\item 支持网页程序和服务器编程
+\end{itemize}
+
+\subsection{优势}
+\begin{itemize}
+\item SQL是一种标准数据库语言，PL/SQL 和SQL紧密结合。支持静态和动态的SQL。支持数据操纵、事务控制。
+动态SQL是允许嵌入PL/SQL块中的数据定义语句。
+\item 支持对代码块的一次整块发送，避免网络拥堵提供程序高性能。
+\item 提供程序员高效的操作
+\item 让你少花费很多时间考虑一些其他的东西
+\item 提供很高的安全性
+\item 提供对已定义包的直接调用
+\item 提供面向对象的编程
+\item 提供对网络程序和服务器程序的支持
+\end{itemize}
+
+\section{基本语法}
+\textit{本章节描述一些基本的语法规则}
+\subsection{范例}
+\textit{PL/SQL 是一种结构化语言，这意味着用它写的程序可以划分为很多程序块，每个块包含以下三个子块}
+
+\begin{description}
+\item[定义] 本块开始于关键字\textbf{DECLARE}。是一个可选择的模块，定义所有的变量、游标、子程序、以及其他元素。
+\item[可执行命令] 本块开始于\textbf{BEGIN}结束于\textbf{END} 是一个强制性必须要有的模块。至少要有一行代码，哪怕是
+	一个NULL命令。
+\item[异常处理] 本块开始于关键字\textbf{EXCEPTION} 此块是可选择的，可有可无。用来处理错误和异常。
+\end{description}
+
+
+每一个语句要以分号结束，PL/SQL语句可以通过\textbf{BEGIN END} 嵌套于其他语句里，下面是一个很基本的PL/SQL 模块：
+
+\begin{minted}{sql}
+DECLARE 
+	<declarations section> 
+BEGIN 
+	<executable command(s)> 
+EXCEPTION 
+	<exception handling> END;
+\end{minted}
+
+\subsection{HelloWorld}
+\begin{minted}{sql}
+DECLARE
+	message varchar2(20) := 'Hello, World!';
+BEGIN
+	dbms_output.put_line(message);
+END;
+/
+\end{minted}
+
+\subsection{标识符}
+PL/SQL 标识符包含常量、变量、异常、过程、游标和一些保留字。标识符是由字符、特殊符号、美元符号等符号组成。
+标识符的长度不要大于30个字符。这东西我就不多说了，对于有编程经验的人意义不是很大，因为都是相通的。
+
+\subsection{分隔符}
+\begin{description}
+\item[$+,-,*,/$] 加、减、乘、除
+\item[$\%$] 属性指标
+\item[$'$] 字符串分隔符
+\item[$.$] 元件选择
+\item[$(,)$] 表达式或者是列表分割
+\item[$:$] 主变量指示符
+\item[$,$] 分隔符
+\item[$"$] 引用标识符分隔符
+\end{description}
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
