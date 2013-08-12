@@ -1,0 +1,166 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{Scribe 编译与非超级权限运行}\\\smallskip}%
+  {\small \textit{关于编译Scribe需要注意的问题}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 8 月 11 日}}
+
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+
+
+\section{编译须知}
+\textit{
+Scribe 依赖一些第三方的包，所以在编译的时候需要一些预先配置，官网上所说的编译过程并不全面，下面是一个较为全面的编译方法。但仍然存在需要改进的地方。
+}
+
+\begin{description}
+\item[libevent] libevent是一个事件触发的网络库，适用于windows、linux、bsd等多种平台，内部使用select、epoll、kqueue等系统调用管理事件机制。
+著名分布式缓存软件memcached也是libevent based，而且libevent在使用上可以做到跨平台，而且根据libevent官方网站上公布的数据统计，似乎也有着非凡的性能。
+\item[boost] Boost库是一个可移植、提供源代码的C++库，作为标准库的后备，是C++标准化进程的发动机之一。 Boost库由C++标准委员会库工作组成员发起，
+其中有些内容有望成为下一代C++标准库内容。在C++社区中影响甚大，是不折不扣的“准”标准库。Boost由于其对跨平台的强调，对标准C++的强调，与编写平
+台无关。大部分boost库功能的使用只需包括相应头文件即可，少数（如正则表达式库，文件系统库等）需要链接库。但Boost中也有很多是实验性质的东西，
+在实际的开发中实用需要谨慎。boost 在一些播放软件和音效中指增强，比如Bass Boost，低音增强。
+\item[thrift] 是一个软件框架，用来进行可扩展且跨语言的服务的开发。它结合了功能强大的软件堆栈和代码生成引擎
+\end{description}
+
+\section{本例中下载的包}
+\begin{description}
+\item[boost\_1\_54\_0.tar.bz2] boost 库，可以从其官网下载，地址为：\url{www.boost.org/}
+\item[thrift-0.9.0.tar.gz] thrift 包，官网地址：\url{http://thrift.apache.org/}
+\item[scribe-master.zip] scribe 包，可以从github上下载，地址为：\url{https://github.com/facebook/scribe/}
+\end{description}
+
+\section{编译并安装}
+\textit{
+不建议在配置时使用自定义的安装路径，这样在编译的时候可能会带来一些不必要的困难和错误。
+}
+
+\subsection{安装编译依赖包}
+\textit{
+基本的编译环境需要的依赖包：
+}
+
+\begin{minted}{sh}
+yum install automake flex bison libevent-devel #libevent-devel 不属于基本开发包，但必须安装
+\end{minted}
+
+
+\section{安装boost}
+\textit{
+不建议设置boost的安装路径，采用默认的安装方式反而更容易编译scribe。
+boost 默认情况下会把boost的动态库安装到\dirname{/usr/local/lib} 所以
+我们在编译完成后可以直接把它拷贝到我们的路径下，因为二进制文件在运行时
+只需要boost的动态链接库，而不需要头文件和代码。
+}
+
+\begin{minted}{sh}
+# tar xjvf boost_1_54_0.tar.bz2
+# cd boost_1_54_0
+# ./bootstrap.sh
+# ./b2
+# ./b2 install
+\end{minted}
+
+\section{安装thrift和其下的fb303}
+\textit{
+thrift 的编译需要boost的支持，所以我们在它之前安装了boost，下面是编译步骤。
+}
+
+\begin{minted}{sh}
+# tar xzvf thrift-0.9.0.tar.gz
+# cd thrift-0.9.0
+# ./configure
+# make
+# make install
+
+# cd contrib/fb303
+# ./bootstrap.sh
+# make
+# make install
+\end{minted}
+
+\section{编译scribe}
+\textit{
+我们在前面编译并安装一些依赖的时候全部采用默认方式，这样在编译scribe的时候就能省一些不必要的麻烦，下面是步骤。
+}
+
+\begin{minted}{sh}
+# ./bootstrap.sh
+# ./configure
+# make # 在编译的时候就可能会出错，这是因为它设置的依赖库的原因，总之它存在编译的bug。
+
+# 可以到src路径直接使用命令编译
+# g++  -Wall -O3 -L/usr/local/lib/ -lboost_system -lboost_filesystem  \
+	-o scribed store.o store_queue.o conf.o file.o conn_pool.o scribe_server.o \
+	network_dynamic_config.o dynamic_bucket_updater.o  env_default.o \
+	 -L/usr/local/lib -L/usr/local/lib -L/usr/local/lib -lfb303 -lthrift \
+	 -lthriftnb -levent -lpthread  libscribe.a libdynamicbucketupdater.ae.a \
+	libdynamicbucketupdat
+\end{minted}
+
+编译完成后会生成一个可执行的scribed文件，它就是我们想要的东西！
+
+\section{非超级权限运行}
+\textit{
+绝大多数应用软件是不需要超级用户权限运行的，scribe并不例外，我们没必要采用静态编译的方式解决问题，导出一个库的环境变量
+就解决了这个问题。我们把scribed依赖的动态库放到一个路径，并导出这个路径的环境变量，它就可以使用了，而每个普通用户也维护着一份
+环境变量，所以我们可以把环境变量写在脚本上，在程序执行之前导出。
+}
+
+\section{打到一个文件夹里}
+\textit{
+为了方便使用，我们把scribed打到一个文件夹里，方法如下：
+}
+
+\begin{minted}{sh}
+# mkdir -p scribe-bin/bin/
+# mkdir -p scribe-bin/lib/
+# cp -r /usr/local/lib/* scribe-bin/lib/ 
+# cp scribed scribe-bin/bin/ # 把生成的二进制文件放到文件夹的bin路径
+# tar czvf scribe-bin.tar.gz scribe-bin
+
+\end{minted}
+
+\section{环境变量}
+\textit{
+以下环境变量是用来告诉程序去哪里找动态链接库的东西。
+}
+
+\begin{minted}{sh}
+export LD_LIBRARY_PATH="/usr/lib:path-to-scribe-bin/lib"
+\end{minted}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
