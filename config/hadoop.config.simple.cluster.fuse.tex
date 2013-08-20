@@ -7,13 +7,13 @@
 \usepackage{verbatim}
 \usepackage{comment}
 \usepackage{minted}
-\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\usepackage{float}
 
 \begin{document}
 
 \title{%
-  {\huge \textsf{hadoop configuration}\\\smallskip}%
-  {\small \textit{关于hadoop的配置笔记}}
+  {\huge \textsf{hadoop config and management}\\\smallskip}%
+  {\small \textit{关于hadoop配置管理的手册}}
 }
 
 \author{\textit{屈庆磊}\\[2mm]
@@ -27,6 +27,14 @@
 \tableofcontents
 %\listoftables
 \end{multicols}
+
+\section{写在前面}
+此文档或许有存在的意义吧，如果觉得不爽，删掉就OK啦，文档目的是注重实际，本来是我的学习笔记，未来希望能写成
+一本很容易理解又很容易上手的使用手册，面向一些具体的问题进行分析、解决，后期将会从Java API 的角度，一些特定
+mapreduce 案例的编写 来讲解hadoop，如果一切顺利，此文档在后面将对Hadoop本身代码进行分析，可此路荆棘，非一时
+之功，后期将讲解如何优化 Hadoop，并给出一些测试方法和衡量方法。内容大部分来自网络的各位网友们的总结以及Hadoop
+官网给出的帮助文档。本文档将尽可能的短小精悍，未来将控制在200页左右，并由易到难，而不是和书本式的照本宣科。
+此文本身可能出现一些写作上的失误或者错误，如有发现请邮件我，谢谢！
 
 \section{环境变量}
 本例中采用和很多环境变量，如：\code{JAVA\_HOME HADOOP\_HOME} 等等，建议在做以下工作的时候，先找一个文本文件，把环境变量都写好，
@@ -390,26 +398,421 @@ wordcount_classes/
 
 \textsf{注意：执行run.sh时，注意org.myorg.WordCount是否和上面的wordcount\_classes 结构一致！}
 
+\section{hadoop 配置进阶}
+\subsection{配置垃圾箱}
+\textit{
+想必大家都犯过类似的错误，不小心把一大堆数据全删掉了，咋办？这个时候你会很崩溃的，如果是在操作系统的文件系统下
+你还能使用恢复软件，检查inode节点，恢复数据，但在hadoop上貌似没那么简单，所以有一部时间机器是很有用的，那么我们
+可以开启垃圾箱功能，并设置系统自动删除过期数据的超时时间，这样至少在我们想起删错东西的时候可以挽回带来的损失。
+}
+
+\subsubsection{配置方法}
+\textit{
+只需要更改配置文件：core-site.xml，value的单位是分钟。
+}
+
+\begin{minted}{xml}
+<property>
+	<name>fs.trash.interval</name>
+	<value>1440</value>
+</property>
+\end{minted}
+
+\subsubsection{还原方法}
+\textit{
+只需要把文件从.Trash文件夹里移动到原来的位置即可
+}
+
+\begin{minted}{sh}
+# 比如我在/user/test/lei/ 路径删除一个文件 abc，那么我应该去哪找呢？
+# 其实位置应该在 /user/hadoop/.Trash/Current/user/test/lei/ 路径去找
+# 注意上面路径中的hadoop其实是用户名，我们直接可以把文件移动过去就可以了
+
+$ hadoop fs -mv /user/hadoop/.Trash/Current/user/test/lei/abc /user/test/lei/abc
+
+# 清理垃圾
+$ hadoop fs -rmr /user/hadoop/.Trash
+$
+\end{minted}
+
+\subsection{磁盘预留剩余空间}
+\textit{
+这个参数有点脱了裤子放屁，对于一个正常的软件都应该有防止硬盘写满的测试，或许是为了速度吧，
+在Linux下如果硬盘写满了，会导致一些问题，比如无法写入问题，然后硬盘看着像只读似的，所以尽量
+不要让你的硬盘写满，所以这个选项还是有必要的，特别是对于那些硬盘本来就不是多宽裕个兄弟们。
+}
+
+下面是配置代码，直接写到: hdfs-site.xml 文件里就可以啦！value的单位是字节
+
+\begin{minted}{xml}
+<property> 
+<name>dfs.datanode.du.reserved</name> 
+<value>10737418240</value> 
+<description>Reserved space in bytes per volume
+</description> 
+</property>
+\end{minted}
+
+
+\section{Hadoop 管理}
+\subsection{文件操作类命令}
+\textit{
+这行命令和一些UNIX命令类似，所以比较容易记住，本文档为学习而写，为记忆而写。
+}
+
+\begin{description}
+\item[cat] 查看文件内容，类似于UNIX系统中的cat命令
+
+\begin{minted}{sh}
+# Usage: hadoop fs -cat URL [URI ...]
+hadoop fs -cat hdfs://nn1.example.com/file1 hdfs://nn2.example.com/file2
+hadoop fs -cat file://file3 /user/hadoop/file4
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+
+
+\item[chgrp] 改变文件所属于的组，使用-R参数可以递归执行此路径的所有文件，文件必须属于执行此命令者
+或者执行命令者为超级用户。
+
+\begin{minted}{sh}
+# Usage: hadoop fs -chgrp [-R] GROUP URI [URI ...]
+
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[chmod] 更改文件的权限，忘UNIX的chmod上靠就对了，使用-R递归整个路径
+
+\begin{minted}{sh}
+# Usage: hadoop fs -chmod [-R] [OWNER] [:[GROUP]] URI [URI]
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[chown] 改变文件所属于的用户，使用-R递归整个路径
+
+\begin{minted}{sh}
+# Usage: hadoop fs -chown [-R] [OWNER] [:[GROUP]] URI [URI]
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[copyFromLocal] 和put命令类似，只不过源被限制为本地文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -copyFromLocal <localsrc> URI
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[cp] 复制命令
+
+\begin{minted}{sh}
+# Usage: hadoop fs -cp URI [URI ...] <dest>
+Example: 
+hadoop fs -cp /user/hadoop/file1 /user/hadoop/file2
+hadoop fs -cp /user/hadoop/file1 /user/hadoop/file2 /user/hadoop/dir
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[du] 估计文件空间使用情况
+
+\begin{minted}{sh}
+# Usage: hadoop fs -du URI [URI ...]
+Example: 
+hadoop fs -du /user/hadoop/dir1 /user/hadoop/file2 \
+	hdfs://nn.example.com/user/hadoop/dir1
+
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[dus] 估计某路径的空间使用情况
+
+\begin{minted}{sh}
+# Usage: hadoop fs -dus <args>
+# Example: 
+hadoop fs -dus /user/hadoop/dir1 
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[expunge] 清空垃圾箱，或者比喻为清空回收站
+
+\begin{minted}{sh}
+# Usage: hadoop fs -expunge
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[get] 下载文件到本地
+
+\begin{minted}{sh}
+# Usage: hadoop fs -get [-ignorecrc] [-crc] <src> <localdst>
+# Example: 
+hadoop fs -get /user/hadoop/file localfile
+hadoop fs -get hdfs://nn.example.com/user/hadoop/file localfile
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[getmerge] 下载之前合并，下载后即为合并的文件，也就是说如果在HDFS
+上有一个路径，里面都是小文件，我们可以使用此命令下载此路径的所有文件
+并在下载后形成一个合并的文件。[addnl] 就是在合并后的文件结尾加个换行符
+
+\begin{minted}{sh}
+# Usage: hadoop fs -getmerge <src> <localdst> [addnl]
+# Example: 
+hadoop fs -getmerge /user/hadoop/test localfile
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[ls] 莫要多讲，和UNIX下的ls功能一样
+
+\begin{minted}{sh}
+# Usage: hadoop fs -ls <args>
+# Example: 
+hadoop fs -ls /user/hadoop/test hdfs://nn.example.com/user/hadoop/dir1
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item[lsr] UNIX下的ls -R功能一样，递归列出本路径所有文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -lsr <args>
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[mkdir] UNIX下的mkdir功能一样，创建路径
+
+\begin{minted}{sh}
+# Usage: hadoop fs -mkdir <paths>
+# Example:
+hadoop fs -mkdir /user/hadoop/dir1 /user/hadoop/dir2
+hadoop fs -mkdir hdfs://nn1.example.com/user/hadoop/dir \
+	 hdfs://nn2.example.com/user/hadoop/dir2
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[mv] UNIX下的mv功能一样，移动文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -mv URI [URI ...] <dest>
+# Example:
+hadoop fs -mv /user/hadoop/file1 /user/hadoop/file2
+hadoop fs -mv hdfs://nn.example.com/file1 hdfs://nn.example.com/file2 \
+	hdfs://nn.example.com/file3 hdfs://nn.example.com/dir1
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[put] 上传文件到HDFS
+
+\begin{minted}{sh}
+# Usage: hadoop fs -put <localsrc> ... <dst>
+# Example:
+hadoop fs -put localfile /user/hadoop/hadoopfile
+hadoop fs -put localfile1 localfile2 /user/hadoop/hadoopdir
+hadoop fs -put localfile hdfs://nn.example.com/hadoop/hadoopfile
+hadoop fs -put - hdfs://nn.example.com/hadoop/hadoopfile # 从标准输入读取，并上传
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[rm] 删除文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -rm URI [URI ...]
+# Example:
+hadoop fs -rm hdfs://nn.example.com/hadoop/hadoopfile /user/hadoop/emptydir
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[rmr] 递归删除文件，和UNIX中的 rm -r 差不多
+
+\begin{minted}{sh}
+# Usage: hadoop fs -rmr URI [URI ...]
+# Example:
+hadoop fs -rmr /user/hadoop/dir
+hadoop fs -rmr hdfs://nn.example.com/hadoop/hadoopfile /user/hadoop/emptydir
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[setrep] 设置文件的复制因子数，说白了就是手动设置文件的副本数，使用-R
+可以递归设置一个路径下的所有文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -setrep [-R] <path>
+# Example:
+hadoop fs -setrep -w 3 -R /user/hadoop/dir1 # -w 参数指的是副本数量
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[stat] 查看路径信息
+
+\begin{minted}{sh}
+# Usage: hadoop fs -stat URI [URI ...]
+# Example:
+hadoop fs -stat path
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[tail] 查看文件最后字节到标准输出，和UNIX下的tail类似
+
+\begin{minted}{sh}
+# Usage: hadoop fs -tail pathname
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[test] 查看文件是否存在，是否为0，或者是否是路径，使用-d选项时，
+如果返回值是0则是路径，如果返回值是1则是文件，-1则说明路径不存在
+
+\begin{minted}{sh}
+# Usage: hadoop fs -test -[ezd] URI
+# -e 测试文件是否存在，如果存在返回0
+# -z 测试文件是否为空，如果空返回0
+# -d 测试文件是否是路径，如果是返回0，如果是文件返回1，其他返回-1，在UNIX返回值上看应该是255
+# Example:
+hadoop fs -test -e filename
+
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[text] 以文本方式查看文件，支持zip以及TextRecordInputStream[tbd]格式的文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -text <src>
+
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[touchz] 创建个空文件
+
+\begin{minted}{sh}
+# Usage: hadoop fs -touchz URI [URI ...]
+# Example:
+hadoop -touchz pathname
+
+#返回值：0: 正确 -1: 错误
+\end{minted}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{description}
+
+\subsection{限额管理}
+\textit{
+如果很多人使用hadoop，设置限额是很有意义的，Hadoop quota的设定是针对路径，而不是针对账号
+所以管理上最好每个账号只能写入一个目录，关于权限管理请查看~\ref{pri:1}
+}
+
+\begin{itemize}
+\item[(1)] 设定方式，设定方式有两种，一种是命令空间\footnote{说白了就是允许你建多少个文件}限定，
+另外一种是空间大小设置。
+\item[(2)] 预设是没有任何限额设置的，可以使用\code{hadoop fs -count -q pathname} 查看
+
+\begin{minted}{sh}
+hadoop fs -count -q /user/hadoop/
+# 结果如下，为了能全部显示出来，把tab换成了空格，所以就这样啦，哈哈
+# 下面有一个表格，对这几个字段进行详细的解释，请查看下面的表
+none inf none inf 2 0 0 hdfs://namenode:9000/user/hadoop
+\end{minted}
+
+\begin{center}
+	\label{table:1}
+        \textit{
+        \begin{tabular}{c|c|c|c}
+        \hline
+        序号 & 文字 & 字段名 & 解释 \\
+        \hline
+        1 & none & QUOTA & 允许创建文件或文件夹的个数 \\
+        \hline
+        2 & inf & REMAINING\_QUOTA & 创建文件或文件夹个数剩余 \\
+        \hline
+        3 & none & SPACE\_QUOTA & 允许创建文件总共大小限制 \\
+        \hline
+        4 & inf & REMAINING\_SPACE\_QUOTA & 剩余创建文件总共大小限制 \\
+        \hline
+        5 & 2 & DIR\_COUNT & 路径个数 \\
+	\hline
+	6 & 0 & FILE\_COUNT & 文件个数 \\
+        \hline
+	7 & 0 & CONTENT\_SIZE & 总共文件大小 \\
+	\hline
+        \end{tabular}
+        }
+\end{center}
+
+计算公式，第一个是命名空间计算公式，第二个为空间计算公式
+
+$$ QUOTA - (DIR\_COUNT + FILE\_COUNT) = REMAINING\_QUOTA $$
+$$ SPACE\_QUOTA - CONTENT\_SIZE = REMAINING\_SPACE\_QUOTA $$
+
+下面是一些配置命令的例子：
+
+\begin{minted}{sh}
+hadoop fs -count -q /user/hadoop #查看配置限额
+
+# 设置此路径允许创建文件和文件夹的最大数目
+# 如果要写入的档案数已经超过设定值，会有错误信息 NSQuotaExceededException
+hadoop dfsadmin -setQuota 10000 /user/hadoop/test/ 
+
+# 查看上一步的设定
+hadoop fs -count /user/hadoop/test/
+
+# 设置空间最大允许大小，m,g,t分别代表MB,GB,TB
+# 如果写入的档案数已经超过目前设定值，则会有：DSQuotaExceededException
+hadoop dfsadmin -setSpaceQuota 1g /user/hadoop/test/
+
+# 清除掉设定
+hadoop dfsadmin -clrSpaceQuota /user/hadoop/test/
+\end{minted}
+
+\item[(3)] 备注：路径改名限额设置依然生效，设定后如果档案量超过预设，依然会存在大小为0
+的这些上传文件，这点hadoop做的不咋地，这个可以试验下，或许新版本解决此问题，不得而知，我
+没有进行测试。还有其他BUG，这个看你的hadoop版本了，不过到对使用影响不是很大。
+
+\end{itemize}
+
+\subsection{权限管理详解}
+\label{pri:1}
+
+
+
+
 
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
