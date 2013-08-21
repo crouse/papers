@@ -17,10 +17,10 @@
 }
 
 \author{\textit{屈庆磊}\\[2mm]
-        \email{quqinglei@icloud.com} 
+        \email{quqinglei@pwrd.com} 
        }
 
-\date{\textit{2013 年 7 月}}
+\date{\textit{2013 年 8 月}}
 
 \maketitle
 \begin{multicols}{2}
@@ -30,11 +30,9 @@
 
 \section{写在前面}
 此文档或许有存在的意义吧，如果觉得不爽，删掉就OK啦，文档目的是注重实际，本来是我的学习笔记，未来希望能写成
-一本很容易理解又很容易上手的使用手册，面向一些具体的问题进行分析、解决，后期将会从Java API 的角度，一些特定
-mapreduce 案例的编写 来讲解hadoop，如果一切顺利，此文档在后面将对Hadoop本身代码进行分析，可此路荆棘，非一时
-之功，后期将讲解如何优化 Hadoop，并给出一些测试方法和衡量方法。内容大部分来自网络的各位网友们的总结以及Hadoop
-官网给出的帮助文档。本文档将尽可能的短小精悍，未来将控制在200页左右，并由易到难，而不是和书本式的照本宣科。
-此文本身可能出现一些写作上的失误或者错误，如有发现请邮件我，谢谢！
+一本很容易理解又很容易上手的使用手册，本手册在不断更新中，难免会出现一些bug，如有发现请邮件我，不胜感激！
+此文档将从配置、管理开始到错误处理、最后会涉及mapreduce编程，在这里只是做一个良好的打算，或许还需要一些时间
+才能完成。
 
 \section{环境变量}
 本例中采用和很多环境变量，如：\code{JAVA\_HOME HADOOP\_HOME} 等等，建议在做以下工作的时候，先找一个文本文件，把环境变量都写好，
@@ -221,7 +219,7 @@ cd /home/hadoop/hadoop
 \subsection{编译前的软件依赖安装}
 \begin{minted}{sh}
 # 如果系统是基于Redhat的，请使用yum安装，如果基于debian，使用apt-get 安装，具体如下：
-yum install install automake autoconf m4 libtool pkgconfig fuse fuse-devel fuse-libs
+yum install automake autoconf m4 libtool pkgconfig fuse fuse-devel fuse-libs
 
 apt-get install automake autoconf m4 libtool libextutils-pkgconfig-perl \
 	 fuse libfuse-dev lrzsz build-essential
@@ -809,10 +807,78 @@ hadoop dfsadmin -clrSpaceQuota /user/hadoop/test/
 
 \subsection{权限管理详解}
 \label{pri:1}
+\textit{
+内容基本来自于hadoop 官方文档编写
+}
 
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hadoop Streaming}
+\textit{
+个人理解上，hadoop streaming 就是个分配工作的活，只不过这个过程代替了人工而已，下面将结合例子
+玩一遍，哈哈！
+}
+
+\begin{itemize}
+\item[(1)] 准备，首先要找到你 hadoop内的 hadoop-streaming-1.1.2.jar 文件，版本号可能不同，在hadoop
+包里的路径也可能不同，自己找一下就OK了！
+\item[(2)] 开始... 来自hadoop 官网的最简单的例子
+
+\begin{minted}{sh}
+# 1. 在HDFS上创建一个路径用来测试，比如我创建了 /user/test/lei/input
+# 2. 上传一个或者多个文本文件到此路径，为了方便测试我只上传了一个文件
+# 3. 执行
+
+$HADOOP_HOME/bin/hadoop -put run.sh /user/test/lei/input
+$HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/contrib/streaming/hadoop-streaming-1.1.2.jar \
+	-input /user/test/lei/input -output /user/test/lei/output \
+	-mapper /bin/cat \
+	-reducer /usr/bin/wc
+
+$ # 我们可以坐等结果了
+ ckageJobJar: [/tmp/hadoop-hadoop/hadoop-unjar5343704720857291664/] [] 
+/tmp/streamjob2340675189718993637.jar tmpDir=null
+13/08/20 23:07:23 INFO util.NativeCodeLoader: Loaded the native-hadoop library
+13/08/20 23:07:23 WARN snappy.LoadSnappy: Snappy native library not loaded
+13/08/20 23:07:23 INFO mapred.FileInputFormat: Total input paths to process : 1
+13/08/20 23:07:23 INFO streaming.StreamJob: getLocalDirs(): [/tmp/hadoop-hadoop/mapred/local]
+13/08/20 23:07:23 INFO streaming.StreamJob: Running job: job_201308202255_0002
+13/08/20 23:07:23 INFO streaming.StreamJob: To kill this job, run:
+13/08/20 23:07:23 INFO streaming.StreamJob: /home/hadoop/hadoop-1.1.2/libexec/../bin/hadoop 
+job  -Dmapred.job.tracker=master:9200 -kill job_201308202255_0002
+13/08/20 23:07:23 INFO streaming.StreamJob: Tracking 
+URL: http://master:50030/jobdetails.jsp?jobid=job_201308202255_0002
+13/08/20 23:07:24 INFO streaming.StreamJob:  map 0%  reduce 0%
+13/08/20 23:07:27 INFO streaming.StreamJob:  map 100%  reduce 0%
+13/08/20 23:07:34 INFO streaming.StreamJob:  map 100%  reduce 17%
+13/08/20 23:08:13 INFO streaming.StreamJob:  map 50%  reduce 17%
+13/08/20 23:08:15 INFO streaming.StreamJob:  map 100%  reduce 17%
+13/08/20 23:08:34 INFO streaming.StreamJob:  map 100%  reduce 33%
+13/08/20 23:08:35 INFO streaming.StreamJob:  map 100%  reduce 100%
+13/08/20 23:08:38 INFO streaming.StreamJob: Job complete: job_201308202255_0002
+13/08/20 23:08:38 INFO streaming.StreamJob: Output: /user/test/lei/output
+hadoop@debian:~$ $HADOOP_HOME/bin/hadoop fs -ls /user/test/lei/output/
+Found 3 items
+-rw-r--r--   2 hadoop supergroup          0 2013-08-20 23:08 /user/test/lei/output/_SUCCESS
+drwxr-xr-x   - hadoop supergroup          0 2013-08-20 23:07 /user/test/lei/output/_logs
+-rw-r--r--   2 hadoop supergroup         25 2013-08-20 23:08 /user/test/lei/output/part-00000
+
+# 我们在下面可以看到结果，结果与事实一致，很简单吧
+# 测了一个多个文件的，OK，结果一样OK，哈哈不过数据量小还不如直接本地用wc呢
+
+$ $HADOOP_HOME/bin/hadoop fs -cat /user/test/lei/output/part-00000
+      7      15     205	
+\end{minted}
+\end{itemize}
+
+\section{HIVE}
+\textit{
+hive是基于Hadoop的一个数据仓库工具，可以将结构化的数据文件映射为一张数据库表，并提供完整的sql查询功能，
+可以将sql语句转换为MapReduce任务进行运行。 其优点是学习成本低，可以通过类SQL语句快速实现简单的MapReduce
+统计，不必开发专门的MapReduce应用，十分适合数据仓库的统计分析。\footnote{来自百度百科}
+}
 
 
 \end{document}
-
