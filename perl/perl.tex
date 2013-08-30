@@ -1,0 +1,201 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{Perl}\\\smallskip}%
+  {\small \textit{翻译作品，来自perl官网}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@icloud.com} 
+       }
+
+\date{\textit{2013 年 8 月 29 日}}
+
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+
+\section{说明}
+文中所有带[tbd] 字样的地方说明有疑问，还未曾解决！
+
+\section{Perl 正则快速入门}
+\subsection{名字}
+本文讲述perl正则表达式如何快速入门，基本采用例子讲解
+没有完全按照原文进行翻译，主要是使用其中的例子。
+\url{http://perldoc.perl.org}
+\subsection{描述}
+本文包含了Perl语言的最基本的正则表达式理解、创建、使用
+\subsection{指导}
+
+\subsubsection{单词匹配}
+最简单的正则表达式其实就是一个单词，或者多个单词，由多个字符组成的字符串。含有一个单词的正则表达式可以匹配 包含
+此单词的任意字符串。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"Hello World" =~ /World/; # 匹配
+\end{minted}
+
+在上面的语句中，\code{{\color{blue}=~}}是匹配操作符，\code{{\color{blue}//}}表示包含的是模式串。可以理解为，字符串
+\code{"Hello World"} 中是否有模式\code{World}，如果有则他们匹配，如果把以上语句赋值给一个变量，那么如果匹配，变量
+值为1，反之为空\footnote{注意，如果不匹配得到的结果并不是0，而应该是个空字符串[tbd]}
+
+下面的语句很简单，就不一一细说了，注意符号\code{{\color{blue}=~}} 为不匹配符。还有第四行和第五行其实就是说明了一
+个变量替换的道理，也就是说正则也是可以用变量替换表达的。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+print "It matches\n" if "Hello World" =~ /World/;
+print "It doesn't match\n" if "World Hello" !~ /Hello/;
+
+$greeting = "Adam";
+print "It matches\n" if "Hello Adam" =~ /$greeting/;
+\end{minted}
+
+如果你要匹配：\code{{\color{blue}\$\_}} ，就不需要：\code{{\color{blue}\$\_ =~ }} 了。看下面代码：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+$_ = "Hello World";
+print "It matches\n" if /World/;
+\end{minted}
+
+模式匹配符 \code{{\color{blue}//}} 也是可以被替换成其他任意的符号，只需要在分隔符号前面加一个：
+\code{{\color{blue}'m'}} 即可，如下所示：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"Hello World" =~ m!World!; # 匹配，使用'!'作为分隔符
+"Hello World" =~ m{World}; # 匹配，使用'{}' 包含模式匹配
+"/usr/bin/perl" =~ m"/perl" # '/' 变成了一般符号
+\end{minted}
+
+正则表达式必须精确匹配字符串的一部分，才能保证此语句为真，空格也是字符！
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"Hello World" =~ /world/; # 不匹配，大小写问题
+"Hello World" =~ /o W/; # 匹配， ' ' 也是一般字符
+"Hello World" =~ /World /; # 不匹配，字符串后面没有 ' '(空格)
+\end{minted}
+
+Perl 会先匹配字符串前面的匹配点，也就是说从字符串的开头开始匹配，一旦匹配就返回真:
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"Hello World" =~ /o/; # 它匹配的其实是 'Hello' 中的 'o'
+"That hat is red" =~ /hat/; # 其实它匹配的是 'That' 中的 'hat' 字符串
+\end{minted}
+
+在Perl中，并不是所有的字符就可以直接的匹配，有些字符属于{\color{blue}元字符}(metacharacters)\footnote{所谓元字符
+就是指那些在正则表达式中具有特殊意义的专用字符，可以用来规定其前导字符（即位于元字符前面的字符）在目标对象中的出
+现模式}需要转义后才可以匹配。下面给出了正则表达式中的元字符：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+{}[]()^$.|*+?\
+\end{minted}
+
+在元字符前面使用反斜杠 \code{{\color{blue}\\}} 转义就可以匹配啦，如下所示：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"2+2=4" =~ /2+2/; # 不匹配，原因是'+'属于元字符
+"2+2=4" =~ /2\+2/; # 匹配，我们把'+'给转义成为了普通字符
+'C:\WIN32' =~ /C:\\WIN/; # 匹配，我们使用反斜杠把反斜杠给转义成为了普通字符
+"/usr/bin/perl" =~ /\/usr\/bin\/perl/; # 匹配，不解释了，可以参考下面这个语句
+
+# 当我们使用其他字符作为模式匹配符号时，就不需要对 '/' 进行转义了，它只是一个
+# 模式匹配字符，并不是元字符
+print "matches!\n" if "/usr/bin/perl" =~ m{/usr/bin/perl}; 
+\end{minted}
+
+不可打印字符可以使用转义序列表示，如：\code{{\color{blue}\\t}} 可以表示为制表符 \code{{\color{blue}\\n}} 可以表示
+为换行符\code{{\color{blue}\\r}} 可以表示为回车。另外任意字节都可以通过{\color{red}八进制或者十六进制}数字的转
+义序列表示，下面一些例子：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"1000\t2000" =~ m(0\t2); # 匹配
+"cat" =~ /\143\x61\x74/ # 匹配，其中'143' 是c的八进制ASCII，x61、x74 分别为a、t的十六进制ASCII码
+\end{minted}
+
+可以使用变量替换正则表达式：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+$foo = 'house';
+'cathouse' =~ /cat$foo/; # 使用$foo变量替换，匹配
+'housecat' =~ /${house}cat/; # 匹配
+\end{minted}
+
+废话就不翻译了，我们可以使用锚点来确定匹配位置，比如使用：\code{\^} 来表示匹配字符串开头，使用
+\code{{\color{blue}\$}} 来匹配字符串结尾。如下代码所示：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"housekeeper" =~ /keeper/; # 匹配
+"housekeeper" =~ /^keeper/; # 不匹配
+"housekeeper" =~ /keeper$/; # 匹配
+"housekeeper" =~ /^housekeeper/; # 匹配
+\end{minted}
+
+\subsubsection{使用字符类}
+\textit{
+字符类可以表示一类字符，我们还是看例子吧，这样比较清楚
+}
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/cat/; # 匹配cat
+/[bcr]at/; # 匹配bat cat rat
+"abc" =~ /[cab]/; 先匹配到 a
+\end{minted}
+
+在上面代码中的最后一样，匹配时最先匹配到的其实是 'a' 虽然说它在正则表达式中的第二个，我们以为先匹配到的应该
+是c，但是，perl在处理此问题的时候对[ ]里面的字符进行了排序。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/[yY][eE][sS]/; # 不区分大小写匹配 'yes'
+/yes/i; # 正则后面多了个 i 就可以代替上面一行代码的功能了！
+\end{minted}
+
+在上面代码中最后一行，我们使用了一个字符\code{{\color{blue}i}} 它命令正则不区分大小写进行匹配。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
