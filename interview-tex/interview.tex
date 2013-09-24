@@ -31,6 +31,12 @@
 \newpage 
 
 \section{Random questions}
+\subsection{这个是我遇到的一个问题，在32位的Linux上fopen一个大于2GB的文件，需要做些什么？}
+更改系统的offset，具体以后讲吧，哈哈，估计明白的一看就知道为什么了。
+\begin{mitned}{c}
+#define _FILE_OFFSET_BITS 64 
+\end{minted}
+
 \subsection{编写一段代码，确定一个变量是有符号数还是无符号数}
 \begin{minted}{c}
 #define ISUNSIGNED(a) (a >=0) && (~a >=0)

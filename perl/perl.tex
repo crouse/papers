@@ -49,7 +49,7 @@
 
 在上面的语句中，\code{{\color{blue}=~}}是匹配操作符，\code{{\color{blue}//}}表示包含的是模式串。可以理解为，字符串
 \code{"Hello World"} 中是否有模式\code{World}，如果有则他们匹配，如果把以上语句赋值给一个变量，那么如果匹配，变量
-值为1，反之为空\footnote{注意，如果不匹配得到的结果并不是0，而应该是个空字符串[tbd]}
+值为1，反之为空\footnote{注意，如果不匹配得到的结果并不是0，而应该是NULL}
 
 下面的语句很简单，就不一一细说了，注意符号\code{{\color{blue}=~}} 为不匹配符。还有第四行和第五行其实就是说明了一
 个变量替换的道理，也就是说正则也是可以用变量替换表达的。
@@ -149,7 +149,7 @@ $foo = 'house';
 \begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
 /cat/; # 匹配cat
 /[bcr]at/; # 匹配bat cat rat
-"abc" =~ /[cab]/; 先匹配到 a
+"abc" =~ /[cab]/; #先匹配到 a
 \end{minted}
 
 在上面代码中的最后一样，匹配时最先匹配到的其实是 'a' 虽然说它在正则表达式中的第二个，我们以为先匹配到的应该
@@ -161,6 +161,117 @@ $foo = 'house';
 \end{minted}
 
 在上面代码中最后一行，我们使用了一个字符\code{{\color{blue}i}} 它命令正则不区分大小写进行匹配。
+
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/[\]c]def/; # 匹配 ']def' 或者 'cdef'
+$x = 'bcr';
+/[$x]at/; # 匹配 'bat', 'cat', 'rat'
+/[\$x]at/; # 匹配 '$at', 'xat'
+/[\\$x]at/; # 匹配 '\at', '$at', 'bat', 'cat', 'rat'
+\end{minted}
+
+以上代码的目的：注意转义，正则可替换为变量，\code{{\color{blue}[]}} 里面的字符是或的关系。
+
+特殊字符：\code{{\color{blue}-}} 可以称之为范围操作符，看例子就明白了：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/item[0-9]/; # 匹配'item0', 'item1', 'item2' ... 'item9'
+/[0-9a-fA-F]/; # 匹配十六进制字符
+\end{minted}
+
+在 \code{{\color{blue}[]}} 号里面括住的，注意符号 \^ ，她在不同的位置表示不同的意思，看代码：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/[^a]at/; # 不能匹配 'aat', 'at' 但可以匹配 ' at', 'bat', 'cat', 'dat', '0at', 等
+/[^-9]/; # 匹配非数字字符
+/[a^]at/; # 注意此时 ^ 只是一个单纯的普通字符，此表达式匹配 'aat', '^at'
+\end{minted}
+
+Perl 还有几个缩写的字符类，下面是介绍，为方便我们用 '<=>' 作为等价符号来介绍，她并不是Perl里面的符号：
+在以下代码中我提到的变量，其实意思是在语言中可以用来作为变量的字符
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+[0-9] <=> \d # \d 用来表示任意数字字符
+[\ \t\r\n\f] <=> \s # \s 表示空格、制表符或者换行符、换页符，\f 已经不常用了，可以查看ASCII码表
+[0-9a-zA-Z_] <=> \w # \w 可以这么理解，它代表可以作为变量的所有字符
+\D <=> [^0-9] # 它表示非数字字符
+\S <=> [^\s] # 她匹配所有非空格，制表符，换行符，换页符之外的字符
+\W <=> [^\w] # 匹配任意非变量字符
+\end{minted}
+
+\code{.} 号可以匹配除换行符以外任意字符
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/\d\d:\d\d:\d\d/; # 匹配时间 hh:mm:ss
+/[\d\s]/; # 匹配数字和空格字符，包含换行符、制表符、空格、换页符
+/\w\W\w/; # 匹配一个变量字符中间一个非变量字符，然后后面是一个单词字符，如: a&b
+
+/..rt/; # 匹配以rt结尾开头为任意两个字符的串
+/end\./; # 匹配 'end.'
+/end[.]/; # 匹配 'end.'
+\end{minted}
+
+单词边界符号 \code{\\b} 这个不大好理解，看例子就明白啦：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+$x = "Housecat catenates house and cat";
+$x =~ /\bcat/; # 在 'catenates' 单词中匹配到 'cat'
+$x =~ /cat\b/; # 在 'housecat' 单词中匹配到 'cat'
+$x =~ /\bcat\b/; # 在最后匹配到 'cat'
+\end{minted}
+
+\subsubsection{匹配中的或操作}
+我们可以使用或元字符来匹配模式中的任意一个，下面例子可以说明这一点：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"cats and dogs" =~ /cat|dog|bird/; # 匹配 "cat"
+"cats and dogs" =~ /dog|cat|bird/; # 匹配 "cat"
+\end{minted}
+
+虽然在上面代码中的第二行，dog在正则中的开头，但还是先匹配的'cat' 这是因为 Perl在处理正则表达式的时候对其进行
+了字典排序。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+"cats" =~ /c|ca|cat|cats/; # 匹配到 "c"
+"cats" =~ /cats|cat|ca|c/; # 匹配到 "cats"
+\end{minted}
+
+\subsubsection{分组分层匹配}
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+/(a|b)b/; # 匹配 'ab' 或者 'bb'
+/(^a|b)c/; # 匹配以a开头的 'ac' 或者任意位置的 'bc'
+/house(cat|)/; # 匹配 'housecat' 或者 'house'
+"20" =~ /(19|20)\d\d/; # 无法匹配到'20' 所以匹配结果是NULL
+print "$1\n"; # 得到的结果是空
+\end{minted}
+
+\subsubsection{提取匹配字符串}
+可以使用元字符 \code{()} 提取匹配的字符串，方法如下所示：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{perl}
+$time = "now time is: 18:07:20";
+$time =~ /(\d\d):(\d\d):(\d\d)/;
+$hour = $1;
+$minute = $2;
+$second = $3;
+
+print "hour = $hour\n"; #18
+print "minute = $minute\n"; #07
+print "second = $second\n"; #20
+
+# 另外，我们使用下面的方法比较酷
+
+\end{minted}
+
+
+
+
+
+
+
+
+
 
 
 

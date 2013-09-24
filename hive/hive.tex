@@ -1,0 +1,159 @@
+\documentclass{article}
+\let\tldocenglish=1  % for live4ht.cfg
+\usepackage{tex-live-zh-cn, indentfirst}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{minted}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+
+\begin{document}
+
+\title{%
+  {\huge \textsf{Hive 入门}\\\smallskip}%
+  {\small \textit{翻译作品}}
+}
+
+\author{\textit{屈庆磊}\\[2mm]
+        \email{quqinglei@pwrd.com} 
+       }
+
+\date{\textit{2013 年 9 月 11 日}}
+
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+
+
+\section{安装配置}
+\subsection{安装要求}
+\textit{
+首先要已经安装了Hadoop，本文档不讲述Hadoop的安装方式和使用方法。
+}
+
+\begin{itemize}
+\item Java 1.6 以及更高版本
+\item Hadoop 0.20.x 以及更高版本
+\end{itemize}
+
+\subsection{安装稳定版本的HIVE}
+\textit{
+用户可以从Apache的官方站点下载Hive的稳定版本：\url{http://hive.apache.org/releases.html}
+}
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{sh}
+# 1. 解压安装包，hive安装包一般命名为hive-x.y.z 
+$ tar -xzvf hive-x.y.z.tar.gz
+
+# 2. 设置环境变量
+$ cd hive-x.y.z
+
+$ export HIVE_HOME={{pwd}} # 临时的环境变量，一般我们要写到脚本里或者bashrc 文件里
+# 比如我们把hive解压到了/home/hadoop/hive 路径，那么我们可以如下面一样导出环境变量
+$ export HIVE_HOME=/home/hadoop/hive-x.y.z
+$ export PATH=$PATH:$HIVE_HOME/bin
+
+# 其实以上步骤执行完就算是安装完了，它就是个解压包，无需配置过多
+# 至于编译安装，不再介绍，看官网的吧，此文档为自己学习使用，为加深印象
+\end{minted}
+
+\section{运行HIVE}
+Hive 运行需要以下两个条件：
+
+\begin{itemize}
+\item 你必须在你的路径里安装了Hadoop
+\item export HADOOP\_HOME=<hadoop-instsall-dir> 或许你已经在安装Hadoop时导出了环境变量
+可以使用\code{echo \$HADOOP\_HOME} 进行测试。
+\end{itemize}
+
+现在就可以直接使用了，直接在Terminal里面输入：\code{hive} 就可以直接进入hive的命令行了。
+你会得到如下所示的命令行输入界面：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{sh}
+hive>
+\end{minted}
+
+\subsection{配置管理概述}
+\begin{itemize}
+\item Hive 的的默认配置位置为\dirname{<install-dir>/conf/hive-default.xml}
+\item 配置文件另是可以通过环境变量\dirname{HIVGE\_CONF\_DIR} 去改变的
+\item Log4j\footnote{Log4j 简单的说就是Log for java，即java的日志组件} 
+的配置文档在\dirname{<install-dir>/hive-log4j.properties}
+\item 配置文件建立在Hadoop的配置之上，并默认继承Hadoop的配置
+\item Hive 的配置可以通过以下途径更改：
+	\begin{itemize}
+	\item 更改\dirname{hive-site.xml} 文件
+	\item 通过命令行更改，如：\code{hive -hiveconf x1=y1 -hiveconf x2=y2}
+	此命令分别把y1和y2赋值给变量x1和x2
+	\item 通过设置环境变量\code{HIVE\_OPTS="hiveconf x1=y1 hiveconf x2=y2"} 可以达到同样的效果。
+	\end{itemize}
+\item 运行时配置
+	\begin{itemize}
+	\item Hive 的查询使用了map-reduce，因此查询行为可以通过更改hadoop配置变量来控制
+	\item 命令行中的'SET' 可以用来设置hadoop或者hive的配置变量，如下：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{sh}
+# SET -v 会打印出现在的所有变量信息，不加-v只会打印hive的变量信息
+hive> SET mapred.job.tracker=myhost.mycompany.com:50030;
+hive> SET -v;
+\end{minted}
+
+	\end{itemize}
+\end{itemize}
+
+\subsection{Hive, 本地和mapreduce}
+Hive 编译器为大部分的查询生成map-reduce作业。这些作业是否提交为Map-Reduce集群取决于变量：\code{mapred.job.tracker}
+
+Hadoop 也提供一个小巧的参数，用来指定作业是运行在集群上还是运行在用户的工作站上，虽然一般来说一个map-reduce集群就
+意味着多个节点。当数据比较小的时候，在单台机器上的运行速度反而要比在集群上运行速度快。数据可以直接从HDFS上透明访
+问。当然数据量大的时候集群处理肯定比本地运行速度快，必经本地只有一个reducer。
+
+Hive完全支持本地模式运行，下面的参数可以设置其本地运行：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{sh}
+hive> SET mapred.job.tracker=local;
+\end{minted}
+
+另外变量\code{mapred.local.dir}应该指向一个路径，否则会收到一个分配磁盘空间的异常，一般定义为：
+\dirname{/tmp/<username>/mapred/local}
+
+我们还可以通过变量\code{hive.exec.mode.local.auto}来控制hive是否能自动执行本地模式。此模式默认是关闭的，如果
+打开此模式Hive会分析每一个map-reduce作业的大小，并根据以下参数确定是否执行本地模式：
+
+\begin{itemize}
+\item 输入数据量小于参数：\code{hive.exec.mode.local.auto.inputbytes.max} 的设置值，默认为128MB
+\item Map-task数量少于参数：\code{hive.exec.mode.local.auto.tasks.max} 的值，默认为4
+\item Reduce-task 应该是1或者0
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
