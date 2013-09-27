@@ -7,31 +7,93 @@
 \usepackage{verbatim}
 \usepackage{comment}
 \usepackage{minted}
+\usepackage{lettrine}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 
 \begin{document}
 
 \title{%
-  {\huge \textsf{Java 笔记}\\\smallskip}%
-  {\small \textit{java 笔记}}
+  {\huge \textsf{Java 教程}\\\smallskip}%
+  {\small \textit{\url{tutorialspoint.com}}}
 }
 
 \author{\textit{屈庆磊}\\[2mm]
         \email{quqinglei@pwrd.com} 
        }
 
-\date{\textit{2013 年 9 月 22 日}}
+\date{\textit{2013 年 9 月 27 日}}
 
 \maketitle
 \begin{multicols}{2}
 \tableofcontents
 \end{multicols}
 
-\section{常识}
+\section{说明}
+\code{Java} 是一门面向对象的高级语言，最初由太阳微系统公司于1995年发布。\code{Java}运行于\code{Windows}
+，\code{Mac OS}，各种\code{UNIX}以及其变种的操作系统之上。本教程将会完整讲述\code{Java}语言。
+
+本参考手册将会从简单、可练习的方式循序渐进的教你如何去学习这门语言。
+
+\section{读者}
+本参考手册准备向初学者讲述\code{Java}的基本概念和与其相关的高级用法。
+
+\section{先决条件}
+在你开始决定练习本参考手册上面的各种例子之前，我们假设你已经了解什么是计算机程序以及什么是编程语言。本参考
+手册并不要求你有太多经验。
+
+\section{版权声明}
+本手册所有内容版权归属于\url{tutorialspoint.com} 在没有得到作者允许的情况下本文档的任何内容不得经过任何形式
+的再发布，否则视为对侵犯版权法。
+
+本手册可能不可避免的存在一些错误，我们不担保网站以及本手册内容的正确性。如果你发现网站以及本手册存在错误，
+请发邮件至\email{webmaster@tutorialspoint.com}
+
+\section{译者声明}
+本文档为译者个人翻译作品，不允许任何形式的复制、再发布，如果需要可能会联系本作品的最初撰写者，取得中文版
+的发布权利。
+
+\section{\code{Java}观其大略}
+\code{Java} 程序设计语言最初是由太阳微系统公司开发，起初是由\code{James Gosling} 创建，于1995年作为太阳
+微系统公司的核心模块发布，也就是所谓的\code{Java 1.0 [J2SE]}
+
+翻译这本手册的时候，\code{Java}的最新版本已经是\code{Java7u21}。归于\code{Java}语言的先进以及大众化，多
+种平台被配置从而适合\code{Java}运行。\code{J2EE} 是\code{Enterprise Applications}的缩写，\code{J2ME} 是
+\code{Mobile Applications}的缩写，即企业应用和移动应用。
+
+太阳微系统公司已经把\code{J2}重命名为\code{Java SE} 为和\code{Java EE}以及\code{Java ME} 相互对照。\code{Java}
+总冠以：写一次、运行在任何地方。
+
+\code{Java}是:
+
 \begin{itemize}
-\item 一个源文件可以有多个类，但最多只能有一个public类
+\item {\bf面向对象} \code{Java}的所有都是面向对象的。由于\code{Java}基于对象模型，所以她很容易扩展。
+\item {\bf平台独立} 和其他包括\code{C/C++}在内的语言不通，\code{Java}不会被编译为机器相关的二进制程序，她
+只是被编译为了字节码。字节码分布于网络中并为运行在平台上的虚拟机\code{(JVM)}所执行。
+\item {\bf简单} \code{Java}被设计为简单易学的语言，如果你懂得简单的面向对象模型，就很容易掌握她。
+\item {\bf安全} 基于\code{Java}的安全特性可以开发出免受病毒侵扰、无法篡改的系统，她基于公共密匙加密。
+\item {\bf架构中立} \code{Java}编译器产生的是架构中立的对象文件，所以这种文件可以在许多处理器上运行。
+\item {\bf可移植} 由架构中立、平台无关性的特征使\code{Java}非常容易移植。编译器和\code{Java}是采用\code{ANSI C}
+编写，并属于\code{POSIX}的子集。
+\item {\bf可靠性} \code{Java}努力在编译时和运行时做错误检查和运行时检查，当然错误无法避免。
+\item {\bf多线程} \code{Java} 具有多线程编程的特点，可以同时运行多个任务。可以使开发者顺利运行交互性程序。
+\item {\bf解释性} \code{Java} 边解释边执行，并不存储在任何地方。{\textsf The development process is more rapid
+and analytical since the linking is an incremental and light weight process}
+\item {\bf高性能} 使用\code{Just-In-Time}编译器使\code{Java}拥有高性能。
+\item {\bf分布式} \code{Java}是为网络的分布式环境设计的。
+\item {\bf动态性} \code{Java} 被认为比\code{C/C++}更为动态化。
 \end{itemize}
-
-
-
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

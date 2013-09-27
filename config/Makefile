@@ -1,7 +1,7 @@
 # $Id: Makefile 15704 2009-10-08 22:57:44Z karl $
 # Makefile for TeX Live documentation.  Public domain.
 TEX = xelatex -shell-escape -8bit
-doc1 = hadoop.config.simple.cluster.fuse
+doc1 = hadoop
 doc2 = windows.config.simple
 source1 = $(doc1).tex
 source2 = $(doc2).tex
