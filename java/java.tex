@@ -14,11 +14,11 @@
 
 \title{%
   {\huge \textsf{Java 教程}\\\smallskip}%
-  {\small \textit{\url{tutorialspoint.com}}}
+  {\small \textit{翻译作品}}
 }
 
 \author{\textit{屈庆磊}\\[2mm]
-        \email{quqinglei@pwrd.com} 
+        \email{quqinglei@icloud.com} 
        }
 
 \date{\textit{2013 年 9 月 27 日}}
@@ -61,7 +61,7 @@
 \code{Mobile Applications}的缩写，即企业应用和移动应用。
 
 太阳微系统公司已经把\code{J2}重命名为\code{Java SE} 为和\code{Java EE}以及\code{Java ME} 相互对照。\code{Java}
-总冠以：写一次、运行在任何地方。
+总冠以：编写一次，随处运行。
 
 \code{Java}是:
 
@@ -80,8 +80,255 @@
 and analytical since the linking is an incremental and light weight process}
 \item {\bf高性能} 使用\code{Just-In-Time}编译器使\code{Java}拥有高性能。
 \item {\bf分布式} \code{Java}是为网络的分布式环境设计的。
-\item {\bf动态性} \code{Java} 被认为比\code{C/C++}更为动态化。
+\item {\bf动态性} \code{Java} 被认为比\code{C/C++}更为动态化，她被设计为更加适应不断变化的环境。她携带大量的
+运行时信息，用于验证和解决运行时对象访问。
 \end{itemize}
+
+\subsection{\code{Java}的历史}
+\code{James Gosling}在为他的机顶盒项目中于1991年创建了\code{Java}语言。起初她叫\code{Oak}，那是因为在
+\code{Gosling}的办公室外面有一棵橡树，她也曾经被称之为\code{Green}。后来被命名为\code{Java}，这算是从
+一列单词中随机选择的吧。
+
+太阳微电子公司于1995年发布了\code{Java 1.0}版本，她承诺编写一次，随处运行。在流行的平台上提供无成本
+运行时间。\textit{It promised Write once, Run Anywhere(WORA), providing no-cost run-times on popular platforms}
+
+2007年5月8日，太阳微电子公司完成除了对一小部分不属于自己的源代码以外的\code{Java}所有核心代码的开源进程。
+
+\subsection{你需要的工具}
+你需要一个配置在\code{Pentium 200-MHz 64MB RAM}以上的计算机，来执行本教程中的例子，除此之外还需要一些软件：
+\begin{itemize}
+\item \code{Linux 7.1} 或者 \code{Wndows 95/98/2000/xp/vista/7} 操作系统
+\item \code{Java JDK}
+\item 一个编辑器，比如:\code{Microsoft Notepad}或者其他文本编辑器。
+\end{itemize}
+本文档会提供创建图形操作界面，网络，以及基于\code{Web}应用程序的必要技术。
+
+\subsection{下一步，我们要干啥}
+下一章节介绍开发环境的安装部署
+
+\section{\code{Java}环境配置}
+在我们为走更远的路之前，最重要的是先配置好环境。本章会告诉你如何下载、安装\code{Java}，请跟随下面的步骤。
+算了，我想这个章节还是不要翻译了，必经书本太老，\code{JDK}在不断更新，而且网络上可以搜的到，比如你可以搜：
+\code{Java 开发环境搭建} 跟随网络上的教程就可以了。%[ommit]
+
+\section{\code{Java} 基本语法}
+我们可以把\code{Java}程序理解为定义好的一大堆对象，他们通过调用彼此的方法进行交互。我们现在简单的看一下类、
+对象、方法和实例变量的意义。
+\begin{itemize}
+\item {\bf 对象} 对象拥有状态和行为。比如一只狗拥有一下状态特征：颜色、名字、品种，同样拥有摇头摆尾、狗吠、
+吃饭等行为特征。对象为类的实例。
+\item {\bf 类} 类可以描述为是一种模板或者蓝图，可以把它理解为是一种定义。
+\item {\bf 实例变量} 每个对象都有其独立的实例变量。对象状态的建立其实就是实例变量的赋值。
+\end{itemize}
+
+\subsection{第一个程序}
+我们看一下下面这段简单的代码，也就是我们在学习语言中遇到的第一个程序：\code{Hello World}。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+// MyFirstJavaProgram.java
+public class MyFirstJavaProgram {
+	/* This is my first java program.
+	 * This will print 'Hello World' as the output
+	 */
+	public static void main(String [] args) {
+		System.out.println("Hello World"); // prints Hello World
+	}
+}
+\end{minted}
+
+保存以上代码到\dirname{MyFirstJavaProgram.java} 按照以下步骤编译并运行
+\begin{itemize}
+\item 打开一个文本编辑器
+\item 保存以上代码为：\dirname{MyFirstJavaProgram.java}
+\item 打开一个终端，切换到文件保存的路径，执行以下命令
+\item \code{javac MyFirstJavaProgram.java}
+\item \code{java MyFirstJavaProgram} 结果打印为：Hello World，则证明编译运行成功
+\end{itemize}
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+# compile example LINUX
+% javac MyFirstJavaProgram.java
+% java MyFirstJavaProgram
+Hello World
+\end{minted}
+
+\subsection{基本句法}
+关于\code{Java}编程，下面的要点需要记住：
+\begin{itemize}
+\item {\bf 大小写敏感} \code{Java}是大小写敏感的语言，"Hello"和"hello"代表不同的意思
+\item {\bf 类名} 类名的第一个字母要大些，当然你小写也可以，这只是一种约定
+\item {\bf 方法名} 方法名开头字母应该为小写，这也属于编程的规范约定
+\item {\bf 文件名} 文件名要和类名完全一致，除了后面的后缀以外
+\item {\bf public static void main(String args[])} \code{Java} 程序从主函数开始执行
+\end{itemize}
+
+\subsection{\code{Java}标识符}
+\code{Java}的组件包括各种名称，类名、变量、方法都被称为标识符。关于标识符的命名规范如下，其实和
+其他语言类似，特别是类\code{C}语言。
+\begin{itemize}
+\item \code{Java}标识符由数字，字母和下划线,美元符号组成。在\code{Java}中是区分大小写的，而且还要
+求首位不能是数字
+\item \code{Java}关键字不能当作标识符
+\item 合法标识符如：\code{age, \$salary, \_value, \_1\_value}
+\item 不合法标识符如：\code{123abc, -salary}
+\end{itemize}
+
+\subsection{\code{Java}修饰符}
+和其他语言一样\code{Java}同样拥有修饰符，通过修饰符我们可以更改类、方法等元素。基本上有两类修饰符：
+\begin{itemize}
+\item {\bf 访问修饰符}: default, public, protect, private
+\item {\bf 不可访问修饰符}: final, abstract, strictfp [tbd]
+\end{itemize}
+
+未来的章节我们会对修饰符进行更深刻的讨论
+
+\subsection{\code{Java} 变量}
+\begin{itemize}
+\item 局部变量
+\item 类变量，(即静态变量)是全局变量
+\item 常量，常量不能被更改，使用关键字\code{final}修饰，必须在常量声明时进行初始化
+\end{itemize}
+
+\subsection{\code{Java 数组}}
+数组是同样类型的不同变量。\code{Java}的数组是存放在堆上的，这不同于\code{C}，\code{C}默认是在栈上的。
+我们会在后面的章节中讲述如何声明、创建、初始化数组。
+
+\subsection{\code{Java} 枚举变量}
+枚举变量从\code{Java 5.0}被引进。枚举限定一个变量有一个或者多个预定义的值，在此里列表中的值称之为枚举变量。
+
+使用枚举可以尽量避免使用数字带来的错误。
+
+下面是一个枚举类型的使用例子：[tbd]
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+class FreshJuice {
+	enum FreshJuiceSize {SMALL, MEDUIM, LARGE}
+	FreshJuiceSize size;
+}
+
+public classFreshJuiceTest {
+	public static void main(String args[]) {
+		FreshJuice juice = new FreshJuice();
+		juice.size = FreshJuice.FreshJuiceSize.MEDUIM;
+	}
+}
+\end{minted}
+
+\subsection{保留字}
+下面的表格中是\code{Java}的保留字，这些保留字不能被当做变量或者标识符名称。
+
+\begin{center}
+        \textit{
+        \begin{tabular}{c|c|c|c}
+        \hline
+        \hline
+        abstract & assert & boolean & break \\
+        \hline
+	byte & case & catch & char \\
+	\hline
+	class & const & continue & default \\
+	\hline
+	do & double & else & enum \\
+	\hline
+	extends & final & finally & float \\
+	\hline
+	for & goto & if & implements \\
+	\hline
+	import & instanceof & int & interface \\
+	\hline
+	long & native & new & package \\
+	\hline
+	private & protected & public & return \\
+	\hline
+	short & static & strictfp & super \\
+	\hline
+	switch & synchronized & this & throw \\
+	\hline
+	throws & transient & try &  void \\
+	\hline
+	volatile & while \\
+	\hline
+	\hline
+        \end{tabular}
+        }
+\end{center}
+
+\subsection{注释}
+\code{Java}支持多行和单行注释，这个和\code{C/C++}一致，且注释不能嵌套。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+public class MyFristJavaProgram {
+	public static void main(String args[]) {
+		/* 这里面包含的就是注释，编译器会自动忽略，
+		   而且是多行注释 */
+		System.out.println("Hello World"); // 单行注释，编译器自动忽略
+	}
+}
+\end{minted}
+
+\subsection{空白行}
+空行和注释行都被称为空白行，\code{Java}会忽略他们
+
+\subsection{继承}
+如果你需要创建一个新的类型，而已经存在一个其他的类，你仅仅需要的是再添加一些其他的代码，你可以继承这个类。
+从而演化成一个新的类。
+
+这属于代码重用，避免你重复劳动。
+
+\subsection{接口}
+在\code{Java}语言中，我们可以定义接口，接口是两个对象之间用来通讯的方式。方法在继承中扮演很很重要的角色。
+
+接口定义方法，派生类可以使用它，但是至于方法实现完全取决于派生类。
+
+\subsection{下一步我们要干啥呢}
+下一章节将要讲述对象和类。在下一章节的结尾你应该能对对象和类有一个清晰的认识。
+
+\section{\code{Java} 对象和类}
+\code{Java}是一种面向对象的编程语言。她支持以下的概念：
+\begin{itemize}
+\item {\bf Polymorphism} 多态性
+\item {\bf Inheritance} 继承
+\item {\bf Encapsulation} 封装
+\item {\bf Abstraction} 抽象
+\item {\bf Classes} 类
+\item {\bf Objects} 对象
+\item {\bf Instance} 实例
+\item {\bf Method} 方法
+\item {\bf Message Parsing} 消息解析
+\end{itemize}
+
+本章中我们将会讲述类和对象的概念。
+\begin{itemize}
+\item {\bf 对象} 对象拥有状态和行为。比如狗有颜色、名字、种类的状态，以及摇头摆尾、大声吠叫、吃饭等行为
+\item {\bf 类} 类可以被理解成是模板或者蓝图，而对象是类的实例。或者说类是规范。
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \end{document}
 
 
