@@ -423,9 +423,56 @@ Passed Name is: tommy
 \end{minted}
 
 \subsection{访问实例的变量和方法}
+实例的变量和方法可以通过创建的对象访问。如下所示：
 
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+/* First create an object */
+ObjectReference = new Constructor();
+/* Now call a variable as follows */
+ObjectReference.variableName;
+/* Now you can call a class method as follows */
+ObjectReference.MethodName();
+\end{minted}
 
+看下面的例子：
 
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+public class Puppy {
+	int puppyAge;
+	public Puppy(String name) {
+		System.out.println("Passed Name is: " + name);
+	}
+	public void setAge(int age) {
+		puppyAge = age;
+	}
+	public int getAge() {
+		System.out.println("Puppy's age is: " + puppyAge);
+		return puppyAge;
+	}
+	public static void main(String args[]) {
+		Puppy myPuppy = new Puppy("tommy");
+		myPuppy.setAge(2);
+		myPuppy.getAge();
+		System.out.println("Variable value: " + myPuppy.puppyAge);
+	}
+}
+
+// 以下是运行结果：
+Passed Name is: tommy
+Puppy's age is: 2
+Variable value: 2
+\end{minted}
+
+\subsection{源代码文件声明规则}
+本章节的最后我们看一下源文件的一些声明规则。这些规则很有必要，特别是当你声明一个类、执行导入、和
+使用包语句。
+\begin{itemize}
+\item 一个源文件里面最多只能有一个\code{public}类
+\item \code{public}类名应该就是源文件的名称，如果类名为\code{public Employee{}}那么源文件名就应该为：
+\dirname{Employee.java}
+\item 如果类定义在一个包内，那么包声明语句应该在文件开头
+\item 
+\end{itemize}
 
 
 
