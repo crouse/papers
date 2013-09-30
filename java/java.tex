@@ -9,6 +9,8 @@
 \usepackage{minted}
 \usepackage{lettrine}
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
+% [tbd] means to be development
+% [tbr] means to be view
 
 \begin{document}
 
@@ -302,6 +304,128 @@ public class MyFristJavaProgram {
 \item {\bf 对象} 对象拥有状态和行为。比如狗有颜色、名字、种类的状态，以及摇头摆尾、大声吠叫、吃饭等行为
 \item {\bf 类} 类可以被理解成是模板或者蓝图，而对象是类的实例。或者说类是规范。
 \end{itemize}
+
+\subsection{对象}
+让我们深入理解一下什么是对象，其实我们周围有很多很多的对象，车、狗、人等等，这些对象都拥有状态以及行为。
+
+软件对象也拥有状态和行为，一个软件的对象状态存储在一定的字段中而行为在方法定义中。
+
+所以在软件开发中，方法是在对象内部操作，对象间的通讯是通过方法之间的调用进行的。
+
+\subsection{类}
+我们可以把类看做是蓝图，下面是一个类的例子：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+public class Dog {
+	String breed; // 种类
+	int age;
+	String Color; 
+	
+	void barking() {
+	}
+	void hungry() {
+	}
+	void sleeping() {
+	}
+}
+\end{minted}
+
+一个类可以包含如下变量类型：
+
+\begin{itemize}
+\item {\bf 局部变量} 定义在方法、构造函数、代码块中的变量被称作局部变量，变量在方法里定义、初始化，并随
+方法执行完毕而释放。
+\item {\bf 常量} 常量是定义在类中，方法外的变量，这些变量在类加载的时候被初始化。常量可以被类中的方法、
+构造函数、代码块访问。常量不允许修改，使用关键字\code{final}定义。
+\item {\bf 类变量} 类变量在类中声明，在方法之外，使用\code{static}关键字定义，特点是如果一个类的对象更改
+了类变量的值，那么在其他对象中，类变量的值随之改变。下面是个例子：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+// Cat.java
+class Cat {
+	static String name = "Kitty";
+	void sayName() {
+		System.out.println(name);
+	}
+}
+
+// CatTest.java
+public class CatTest {
+	public static void main(String args[]) {
+		Cat cat01 = new Cat();
+		Cat cat02 = new Cat();
+		System.out.println("名字没被修改之前：");
+		cat01.sayName();
+		cat02.sayName();
+
+		cat01.name = "Tom"; // 修改名字为Tom
+		System.out.println("名字被修改之后：");
+		cat01.sayName();
+		cat02.sayName();
+	}
+}
+// 运行后的结果：
+名字没被修改之前：
+Kitty
+Kitty
+名字被修改之后：
+Tom
+Tom
+\end{minted}
+\end{itemize}
+
+\subsection{构造函数}
+我们在谈论类的时候，构造函数是一个必然不会拉掉的话题，它是类的一个很重要的特性。每个类都有一个构造函数。
+如果我们没有写构造函数，编译器会自动构造一个默认的构造函数。
+
+构造函数必须和类名一致，每创建一个新的对象时，至少有一个构造函数将被调用。一个类可以有多个构造函数。
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+public class Puppy {
+	public Puppy() {
+	}
+	public Puppy(String name) {
+		//This constructor has one parameter, name.
+	}
+
+}
+\end{minted}
+
+\code{Java} 支持单例模式，你可以创建一个类的唯一实例，[tbr]
+
+\subsection{创建一个对象}
+我们在前面提及了类，类为对象提供蓝图。所以基本上一个对象是通过类创建的，在\code{Java}中\code{new}关键字
+被用来创建一个新的对象。
+
+下面是一个对象的创建步骤：
+\begin{itemize}
+\item {\bf 声明} 一个被声明为对象的变量
+\item {\bf 实例化} 使用关键字\code{new}
+\item {\bf 初始化} \code{new}关键字后面跟着一个构造器。这会初始化一个新的对象
+\end{itemize}
+下面是一个例子：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{java}
+public class Puppy {
+	public Puppy(String name) {
+		System.out.println("Passed Name is: " + name);
+	}
+	public static void main(String args[]) {
+		Puppy myPuppy = new Puppy("tommy");
+	}
+}
+\end{minted}
+
+如果我们编译并执行，结果会是：
+
+\begin{minted}[linenos, frame=lines, framesep=2mm]{sh}
+Passed Name is: tommy
+\end{minted}
+
+\subsection{访问实例的变量和方法}
+
+
+
 
 
 
