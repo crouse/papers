@@ -30,6 +30,11 @@
 \end{multicols}
 \newpage 
 
+\section{pkg-config}
+\begin{minted}{sh}
+gcc -o test test.c `pkg-config --libs --cflags libpng`
+\end{minted}
+
 \section{线程和栈}
 每个线程都有独立的栈空间，这是必然的要不就乱套了，这个问题想想也会明白，因为
 每个线程其实都是一个单独的调用单位，在Linux下他们都属于较为轻量级的进程，每个线程

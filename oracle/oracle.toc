@@ -1,0 +1,2 @@
+\contentsline {section}{\numberline {1}常用方法}{1}{section.1}
+\contentsline {subsection}{\numberline {1.1}查找表}{1}{subsection.1.1}
